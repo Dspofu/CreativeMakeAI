@@ -1,16 +1,17 @@
 # PyTorch com CUDA 12.1 (ajuste se necessário)
-torch==2.2.2+cu121
-torchvision==0.17.2+cu121
-torchaudio==2.2.2+cu121
+--pre
+torch
+torchvision
+torchaudio
 --extra-index-url https://download.pytorch.org/whl/cu121
 
 # Hugging Face Diffusers e dependências
-diffusers==0.27.2
-transformers==4.41.2
-accelerate==0.30.1
+diffusers
+transformers
+accelerate
 
 # Carregamento de checkpoints .safetensors
-safetensors==0.4.2
+safetensors
 
 # Utilidades
-Pillow==10.3.0
+Pillow
