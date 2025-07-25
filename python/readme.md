@@ -3,5 +3,5 @@
 Comando python para atualizar o gerenciador de pacotes
 
 ```batch
-.venv\Scripts\python.exe -m pip install --upgrade pip
+.\venv\Scripts\python.exe -m pip install --upgrade pip
 ```
