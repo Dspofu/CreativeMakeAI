@@ -1,9 +1,4 @@
-# PyTorch com CUDA 12.1 (ajuste se necessário)
---pre
-torch
-torchvision
-torchaudio
---extra-index-url https://download.pytorch.org/whl/cu121
+# Instalação para PyTorch use os .bat correspondentes
 
 # Hugging Face Diffusers e dependências
 diffusers

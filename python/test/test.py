@@ -1,17 +1,16 @@
-import torch
-import hashlib
-import psutil
 import os
-import tkinter as tk
+import torch
 from diffusers import StableDiffusionXLPipeline
+from safetensors.torch import load_file
+import tkinter as tk
 from PIL import ImageTk, Image
+import hashlib
 
 def hash_tensor(tensor):
   return hashlib.sha256(tensor.cpu().numpy().tobytes()).hexdigest()
 
 # Caminho do checkpoint
 ckpt_path = "E:/models/checkpoint/prefectPonyXL_v50.safetensors"
-lora_path = "E:/models/checkpoint/LoRas/ellenjoePDXL_scarxzys.safetensors"
 bg_frame = "#1e1e2f"
 bg_input = "#1a1a28"
 bg_window = "#1e1e2f"
@@ -19,23 +18,51 @@ fg_text = "white"
 
 # Carrega o modelo base SDXL
 pipe = StableDiffusionXLPipeline.from_single_file(
-  ckpt_path,
-  torch_dtype=torch.float16,
-  variant="f16"
+  "E:/models/checkpoint/prefectPonyXL_v50.safetensors",
+  torch_dtype=torch.float16
 )
+# pipe = StableDiffusionXLPipeline.from_pretrained(
+#   "stabilityai/stable-diffusion-xl-base-1.0",
+#   torch_dtype=torch.float16,
+#   variant="fp16",
+#   use_safetensors=True,
+#   low_cpu_mem_usage=True,
+# )
 
-# pipe.load_lora_weights(lora_path)
-# pipe.fuse_lora(lora_scale=0.75)
-
-torch.backends.cuda.matmul.allow_tf32 = True
+# Ativa slicing de atenção (economiza MUITA VRAM)
 pipe.enable_attention_slicing("auto")
+# Tiling do VAE (ajuda em imagens grandes)
 pipe.vae.enable_tiling()
+# Offload do modelo (descarrega parte pra RAM)
 pipe.enable_model_cpu_offload()
+# Envia o pipeline pra GPU (parte do modelo fica na RAM)
+# pipe.to("cuda")
 
+# Exemplo: hash de algum peso da UNet
 some_weight = dict(pipe.unet.state_dict())['conv_in.weight']
-print(f"Hash da UNet: {hash_tensor(some_weight)}\nVRAM: {torch.cuda.memory_allocated() / 1024**3:.2f}GB\nRAM: {psutil.Process(os.getpid()).memory_info().rss / 1024**3:.2f}GB")
+print("Hash da UNet:", hash_tensor(some_weight))
 
-# exit(0)
+# Carrega pesos do checkpoint
+weights = load_file(ckpt_path)
+
+# Função para aplicar os pesos em cada parte do modelo
+def load_weights_into_module(module, prefix):
+  module_weights = {k[len(prefix):]: v for k, v in weights.items() if k.startswith(prefix)}
+  missing, unexpected = module.load_state_dict(module_weights, strict=False)
+  print(f"\n\n{prefix}: Missing: {len(missing)}, Unexpected: {len(unexpected)}")
+
+# Aplica pesos nos componentes
+load_weights_into_module(pipe.unet, "unet.")
+# load_weights_into_module(pipe.text_encoder, "text_encoder.")
+# load_weights_into_module(pipe.text_encoder_2, "text_encoder_2.")
+# load_weights_into_module(pipe.vae, "vae.")
+
+print(int(torch.cuda.memory_allocated() / 1024**2) / 1000, "GB usados")
+# print(int(torch.cuda.memory_reserved() / 1024**2) / 1000, "GB reservados")
+# del pipe
+# torch.cuda.empty_cache()
+# torch.cuda.ipc_collect()
+
 # GUI
 window = tk.Tk()
 window.title("v1.0.0 - CreativeMakeAI")
@@ -57,7 +84,8 @@ tk.Entry(main_frame, textvariable=negative_prompt_var, width=40, bg=bg_input, fg
 
 # Função para moniotorar os steps
 def listen_steps(pipe_instance, step_index, timestep, callback_kwargs) -> dict:
-  print(f"\nStep {step_index+1} | Timestep: {timestep}\nVRAM: {torch.cuda.memory_allocated() / 1024**3:.2f}GB\nRAM: {psutil.Process(os.getpid()).memory_info().rss / 1024**3:.2f}GB")
+  # os.system('cls' if os.name == 'nt' else 'clear')
+  print(f"\nStep {step_index} | Timestep: {timestep}\n{int(torch.cuda.memory_allocated() / 1024**2) / 1000}GB Used\n{int(torch.cuda.memory_reserved() / 1024**2) / 1000}GB")
   return {}
 
 # Função de click para gerar imagem
@@ -65,7 +93,7 @@ def generate_click():
   prompt = prompt_var.get()
   negative_prompt = negative_prompt_var.get()
   if not prompt.strip():
-    print("Cancelado por falta de entrada.")
+    print("Digite um prompt!")
     return
 
   # Gera imagem
@@ -76,19 +104,15 @@ def generate_click():
     guidance_scale=7.5,
     callback_on_step_end=listen_steps
   ).images[0]
-  # image.save("pony_result.png")
-  print("Imagem salva.")
+  image.save("pony_result.png")
+  print("Imagem salva como 'pony_result.png'.")
   newWindo = tk.Toplevel(window)
   newWindo.title("Image")
   newWindo.geometry("1024x1024")
   newWindo.resizable(height=False, width=False)
-  # del pipe
-  # torch.cuda.empty_cache()
-  # torch.cuda.ipc_collect()
 
   # Exibir imagem na própria janela:
-  img = ImageTk.PhotoImage(image.resize((1024, 1024)))
-  # img = ImageTk.PhotoImage(Image.open("pony_result.png").resize((1024, 1024)))
+  img = ImageTk.PhotoImage(Image.open("pony_result.png").resize((1024, 1024)))
   panel = tk.Label(newWindo, image=img)
   panel.image = img
   panel.pack()

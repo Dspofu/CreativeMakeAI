@@ -4,6 +4,7 @@ import psutil
 import os
 import tkinter as tk
 from diffusers import StableDiffusionXLPipeline
+from safetensors.torch import load_file
 from PIL import ImageTk, Image
 
 def hash_tensor(tensor):
@@ -11,7 +12,6 @@ def hash_tensor(tensor):
 
 # Caminho do checkpoint
 ckpt_path = "E:/models/checkpoint/prefectPonyXL_v50.safetensors"
-lora_path = "E:/models/checkpoint/LoRas/ellenjoePDXL_scarxzys.safetensors"
 bg_frame = "#1e1e2f"
 bg_input = "#1a1a28"
 bg_window = "#1e1e2f"
@@ -20,14 +20,9 @@ fg_text = "white"
 # Carrega o modelo base SDXL
 pipe = StableDiffusionXLPipeline.from_single_file(
   ckpt_path,
-  torch_dtype=torch.float16,
-  variant="f16"
+  torch_dtype=torch.float16
 )
 
-# pipe.load_lora_weights(lora_path)
-# pipe.fuse_lora(lora_scale=0.75)
-
-torch.backends.cuda.matmul.allow_tf32 = True
 pipe.enable_attention_slicing("auto")
 pipe.vae.enable_tiling()
 pipe.enable_model_cpu_offload()
@@ -76,19 +71,15 @@ def generate_click():
     guidance_scale=7.5,
     callback_on_step_end=listen_steps
   ).images[0]
-  # image.save("pony_result.png")
-  print("Imagem salva.")
+  image.save("pony_result.png")
+  print("Imagem salva como 'pony_result.png'.")
   newWindo = tk.Toplevel(window)
   newWindo.title("Image")
   newWindo.geometry("1024x1024")
   newWindo.resizable(height=False, width=False)
-  # del pipe
-  # torch.cuda.empty_cache()
-  # torch.cuda.ipc_collect()
 
   # Exibir imagem na própria janela:
-  img = ImageTk.PhotoImage(image.resize((1024, 1024)))
-  # img = ImageTk.PhotoImage(Image.open("pony_result.png").resize((1024, 1024)))
+  img = ImageTk.PhotoImage(Image.open("pony_result.png").resize((1024, 1024)))
   panel = tk.Label(newWindo, image=img)
   panel.image = img
   panel.pack()
