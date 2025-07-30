@@ -10,3 +10,4 @@ safetensors
 
 # Utilidades
 Pillow
+customtkinter
