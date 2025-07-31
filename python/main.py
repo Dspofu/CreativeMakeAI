@@ -1,14 +1,9 @@
-import os
 import customtkinter as ctk
-from PIL import Image, ImageTk
-import torch
-from diffusers import StableDiffusionXLPipeline
-import hashlib
-import psutil
 
 # Variaveis default
 ckpt_path = "E:/models/checkpoint/prefectPonyXL_v50.safetensors"
-lora_path = "E:/models/checkpoint/LoRas/ellenjoePDXL_scarxzys.safetensors"
+# lora_path = "E:/models/checkpoint/LoRas/ellenjoePDXL_scarxzys.safetensors"
+pipe = None
 
 # Paleta de cores mantida
 COR_BG_JANELA = "#1e1e2f"
@@ -60,31 +55,36 @@ negative_prompt_entry.pack(padx=20, pady=(0, 20))
 
 # Função de hash
 def hash_tensor(tensor):
+  import hashlib
   return hashlib.sha256(tensor.cpu().numpy().tobytes()).hexdigest()
-
-# Carrega o modelo base SDXL
-pipe = StableDiffusionXLPipeline.from_single_file(
-  ckpt_path,
-  torch_dtype=torch.float16,
-  variant="f16"
-)
-
-# Otimizações
-torch.backends.cuda.matmul.allow_tf32 = True
-pipe.enable_attention_slicing("auto")
-pipe.vae.enable_tiling()
-pipe.enable_model_cpu_offload()
-
-some_weight = dict(pipe.unet.state_dict())['conv_in.weight']
-print(f"Hash da UNet: {hash_tensor(some_weight)}\nVRAM: {torch.cuda.memory_allocated() / 1024**3:.2f}GB\nRAM: {psutil.Process(os.getpid()).memory_info().rss / 1024**3:.2f}GB")
-
-# Função para monitorar os steps
-def listen_steps(pipe_instance, step_index, timestep, callback_kwargs) -> dict:
-  print(f"\nStep {step_index+1} | Timestep: {timestep}\nVRAM: {torch.cuda.memory_allocated() / 1024**3:.2f}GB\nRAM: {psutil.Process(os.getpid()).memory_info().rss / 1024**3:.2f}GB")
-  return {}
 
 # Função de clique para gerar imagem
 def generate_click():
+  import torch
+  # Carrega o modelo base SDXL
+  from diffusers import StableDiffusionXLPipeline
+  pipe = StableDiffusionXLPipeline.from_single_file(
+    ckpt_path,
+    torch_dtype=torch.float16,
+    variant="f16"
+  )
+
+  # Otimizações
+  torch.backends.cuda.matmul.allow_tf32 = True
+  pipe.enable_attention_slicing("auto")
+  pipe.vae.enable_tiling()
+  pipe.enable_model_cpu_offload()
+
+  import psutil
+  import os
+  some_weight = dict(pipe.unet.state_dict())['conv_in.weight']
+  print(f"Hash da UNet: {hash_tensor(some_weight)}\nVRAM: {torch.cuda.memory_allocated() / 1024**3:.2f}GB\nRAM: {psutil.Process(os.getpid()).memory_info().rss / 1024**3:.2f}GB")
+
+  # Função para monitorar os steps
+  def listen_steps(pipe_instance, step_index, timestep, callback_kwargs) -> dict:
+    print(f"\nStep {step_index+1} | Timestep: {timestep}\nVRAM: {torch.cuda.memory_allocated() / 1024**3:.2f}GB\nRAM: {psutil.Process(os.getpid()).memory_info().rss / 1024**3:.2f}GB")
+    return {}
+
   prompt = prompt_entry.get()
   negative_prompt = negative_prompt_entry.get()
 
