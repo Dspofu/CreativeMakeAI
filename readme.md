@@ -1,4 +1,4 @@
 # Projeto para rodar gerações de imagem em umas simples GPU
 
-- Projeto em varsão [Python](./python/) `Em andamento`
-- Projeto em varsão [C++](./cpp/) `Aguardando conclusão da versão em Python`
+- Projeto em versão [Python](./python/) `Em andamento`
+- Projeto em versão [C++](./cpp/) `Aguardando conclusão da versão em Python`
