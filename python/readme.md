@@ -14,7 +14,7 @@ pip install -r requirements.txt
 
 - Python: `3.12.0+`
 - pip: `24.3.1+`
-- GPU Nvidia: `RTX 2060` `GTX 1080 TI 11GB > RTX 2050`
+- GPU Nvidia: `RTX 2060` • `GTX 1080 TI 11GB > RTX 2050`
 
 ## Recomendações
 
