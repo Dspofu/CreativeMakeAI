@@ -1,7 +1,7 @@
 ## Instalação
 
-Caso possua uma placa de video `GPU` entre as series `GTX 10xx` e `RTX 40xx` execute o arquivo `nvidia-gpu(GTX10xx-RTX40xx).bat`, mas se for da serie `RTX 50xx` execute o arquivo `nvidia-gpu(RTX50xx).bat`.
-> Isso é na verdade um detalhe que deve ser observado ao decorrer da versão do **cuda** instalada nas placas de video, as versões de **cuda** `12.8` seria correspondente a serie `RTX 50` e enquanto a versão `12.1` do **cuda** seria das GPU's antecessoras até o momento.
+Caso possua uma placa de video `GPU` que tenha a *capacidade computacional* superior a `5.0` ela ira funcionar, e para instalar esse complemento execute o arquivo `nvidia-gpu-5.0plus.bat`.
+> Isso é na verdade um detalhe que deve ser observado ao decorrer da versão do **cuda toolkit** e a **capacidade computacional** da sua placa de video, para saber se sua `GPU` tem a capacidade computacional de pelo menos `5.0` você pode consultar no [site da Nvidia](https://developer.nvidia.com/cuda-gpus).
 
 #### Baixar os pacotes da aplicação. 
 > Seria ideal antes ler as [**recomendações**](#recomendações)
@@ -10,10 +10,17 @@ Caso possua uma placa de video `GPU` entre as series `GTX 10xx` e `RTX 40xx` exe
 pip install -r requirements.txt
 ```
 
+## Requisitos mínimos
+
+- Python: `3.12.0+`
+- pip: `24.3.1+`
+- GPU Nvidia: `RTX 2060` `GTX 1080 TI 11GB > RTX 2050`
+
 ## Recomendações
 
 - Python: `3.13.1`
-- pip: `24.3.1+`
+- pip: `25.1.1`
+- GPU Nvidia: `RTX 3060 12GB` • `RTX 3050 8GB > GTX 1080 TI 11GB`
 
 #### Gerar o `venv` local para ficar armazenado as libs da aplicação.
 
@@ -21,12 +28,15 @@ pip install -r requirements.txt
 python -m venv venv
 ```
 
-#### Comando no terminal do `Windows` para acessar o `venv`
+#### Duas formas no terminal do `Windows` para acessar o `venv`
+
 ```batch
 .\venv\Scripts\Activate.ps1
+
+.\venv\Scripts\activate.bat
 ```
 
-#### Varificar atualização do seu gerenciador de pacotes `pip`
+#### Verificar atualização do seu gerenciador de pacotes `pip`
 
 ```batch
 .\venv\Scripts\python.exe -m pip install --upgrade pip
