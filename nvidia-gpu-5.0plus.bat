@@ -1,1 +1,3 @@
-pip install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128
+@echo off
+title intaller CreativeMakeAI
+.\installer.exe

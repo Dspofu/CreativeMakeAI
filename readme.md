@@ -1,6 +1,6 @@
 ## Instalação
 
-Caso possua uma placa de video `GPU` que tenha a *capacidade computacional* superior a `5.0` ela ira funcionar, e para instalar esse complemento execute o arquivo `nvidia-gpu-5.0plus.bat`.
+Caso possua uma placa de video `GPU` que tenha a *capacidade computacional* superior a `5.0` ela ira funcionar, para instalar esse complemento e fazer uma breve verificação execute o arquivo `nvidia-gpu-5.0plus.bat`.
 > Isso é na verdade um detalhe que deve ser observado ao decorrer da versão do **cuda toolkit** e a **capacidade computacional** da sua placa de video, para saber se sua `GPU` tem a capacidade computacional de pelo menos `5.0` você pode consultar no [site da Nvidia](https://developer.nvidia.com/cuda-gpus).
 
 #### Baixar os pacotes da aplicação. 
@@ -30,9 +30,14 @@ python -m venv venv
 
 #### Duas formas no terminal do `Windows` para acessar o `venv`
 
+__Powershell
+
 ```batch
 .\venv\Scripts\Activate.ps1
+```
+__Cmd
 
+```batch
 .\venv\Scripts\activate.bat
 ```
 
