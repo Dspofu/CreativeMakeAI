@@ -53,7 +53,8 @@ int main() {
           }
         }
       } else {
-        std::cout << "Por motivo de compatibilidade a GPU tem que ser uma 'nvidia'." << std::endl;
+        MessageBoxW(NULL, L"Sua Placa de video não é suportada.\nPor motivo de compatibilidade somente 'nvidia' é suportada.", L"Falha de incompatibilidade", MB_ICONERROR);
+        std::cout << "Por motivo de compatibilidade somente 'nvidia' é suportada." << std::endl;
         return 0;
       }
     }
