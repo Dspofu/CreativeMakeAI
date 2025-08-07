@@ -9,15 +9,19 @@ def selecionar_modelo():
     filetypes=[("Modelos .safetensors", "*.safetensors")]
   )
   if model_path:
+    print("Iniciando pacotes.")
     import torch
     from diffusers import StableDiffusionXLPipeline
     setTorch = torch
+    print("Carregando modelo.")
     setPipe = StableDiffusionXLPipeline.from_single_file(model_path, torch_dtype=torch.float16, variant="f16")
+    print("Aplicando as otimizações.")
     setTorch.backends.cuda.matmul.allow_tf32 = True
     setPipe.enable_attention_slicing("auto")
     setPipe.vae.enable_tiling()
     setPipe.enable_model_cpu_offload()
     some_weight = dict(setPipe.unet.state_dict())['conv_in.weight']
+    print("Pronto para instruções.")
 
 # Botão
 botao = ctk.CTkButton(window, text="Selecionar modelo", command=selecionar_modelo, font=("Arial", 12))
@@ -27,7 +31,7 @@ main_frame = ctk.CTkFrame(window, fg_color=COR_FRAME)
 main_frame.place(relx=0.5, rely=0.5, anchor="center")
 
 # Prompt
-ctk.CTkLabel(main_frame, text="Prompt:", font=("Arial", 14)).pack(anchor="w", padx=20, pady=(20, 5))
+ctk.CTkLabel(main_frame, text="Prompt:", font=("Arial", 14)).pack(anchor="w", padx=0, pady=(20, 5))
 prompt_entry = ctk.CTkEntry(
   main_frame,
   width=400,
@@ -38,10 +42,10 @@ prompt_entry = ctk.CTkEntry(
   border_width=0,
   corner_radius=8
 )
-prompt_entry.pack(padx=20, pady=(0, 20))
+prompt_entry.pack(padx=0, pady=(0, 20))
 
 # Prompt Negativo
-ctk.CTkLabel(main_frame, text="Prompt Negativo:", font=("Arial", 14)).pack(anchor="w", padx=20, pady=(0, 5))
+ctk.CTkLabel(main_frame, text="Prompt Negativo:", font=("Arial", 14)).pack(anchor="w", padx=0, pady=(0, 5))
 negative_prompt_entry = ctk.CTkTextbox(
   main_frame,
   height=100,
@@ -52,7 +56,19 @@ negative_prompt_entry = ctk.CTkTextbox(
   corner_radius=8
 )
 negative_prompt_entry.insert("0.0", negative_prompt)
-negative_prompt_entry.pack(padx=20, pady=(0, 20), fill="both", expand=True)
+negative_prompt_entry.pack(padx=0, pady=(0, 20), fill="both", expand=True)
+
+# Steps
+ctk.CTkLabel(main_frame, text="Steps:", font=("Arial", 14)).pack(anchor="w", padx=0, pady=(0, 5))
+steps = ctk.CTkSlider(master=main_frame, from_=1, to=100, command=print, width=400)
+steps.set(28)
+steps.pack(anchor="w", padx=0, pady=(0, 20))
+
+# CFG Scale
+ctk.CTkLabel(main_frame, text="CFG Scale:", font=("Arial", 14)).pack(anchor="w", padx=0, pady=(0, 5))
+cfg = ctk.CTkSlider(master=main_frame, from_=0.5, to=30, command=print, width=400)
+cfg.set(4.5)
+cfg.pack(anchor="w", padx=0, pady=(0, 20))
 
 # Função de clique para gerar imagem
 from src.modules.createImage import generate_click
@@ -61,7 +77,7 @@ def viwerImage():
   if setPipe is None or setTorch is None or some_weight is None:
     from src.modules.popup import alert
     return alert("Não houve modelo carregado.")
-  image = generate_click(setTorch, setPipe, some_weight, prompt_entry.get(), negative_prompt_entry.get("1.0", "end-1c") or negative_prompt, steps, cfg)
+  image = generate_click(setTorch, setPipe, some_weight, prompt_entry.get(), negative_prompt_entry.get("1.0", "end-1c") or negative_prompt, int(steps.get()), round(cfg.get(), 1))
   if image == 1:
     return 1
   else:

@@ -22,6 +22,6 @@ ctk.set_default_color_theme("blue")
 
 window = ctk.CTk()
 window.title("v1.0.0@BETA - CreativeMakeAI")
-window.geometry("600x450")
+window.geometry("700x600")
 window.resizable(False, False)
 window.configure(fg_color=COR_BG_JANELA)

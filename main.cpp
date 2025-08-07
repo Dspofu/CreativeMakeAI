@@ -7,19 +7,19 @@
 
 bool loopOption(char& option, D3DADAPTER_IDENTIFIER9 adapterIdentifier) {
   system("cls");
-  std::wcout << L"GPU detectada: " << adapterIdentifier.Description << L"\n\nInstalar e configurar os pacotes automaticamentes:\n[y] - Baixar pacotes\n[n] - Nao quero baixar\n\n> ";
+  std::wcout << L"GPU detectada: " << adapterIdentifier.Description << L"\n\nAgora escolha entre 'instalar a configurar os pacotes automaticamentes' ou caso instalado anteriormente 'iniciar':\n[0] - Nao quero\n[1] - Iniciar programa\n[2] - Baixar pacotes\n\n> ";
   std::cin >> option;
-  if (option != 'y' && option != 'n') return loopOption(option, adapterIdentifier);
+  if (option != '0' && option != '1' && option != '2') return loopOption(option, adapterIdentifier);
   else return true;
 }
 
 bool loopQuest(char& quest) {
   system("cls");
-  std::cout << "Verifique se este dispositivo possui o Python na versão 3.12.0 ou superior\n" << std::endl;
+  std::cout << "Verifique se este dispositivo possui o Python na versão 3.12.0 ou superior.\n\nVersão encontrada: ";
   system("python --version");
-  std::cout << "\nConfirme se ele tem no dispositivo:\n[y] - Sim possuo\n[n] - Nao tenho e vou baixar\n\n> ";
+  std::cout << "\nConfirme se ele foi encontrado:\n[0] - Nao tenho\n[1] - Sim possuo\n\n> ";
   std::cin >> quest;
-  if (quest != 'y' && quest != 'n') return loopQuest(quest);
+  if (quest != '1' && quest != '0') return loopQuest(quest);
   else return true;
 }
 
@@ -34,10 +34,14 @@ int main() {
       if (adapterIdentifier.VendorId == 0x10DE) {
         char quest;
         if (loopQuest(quest)) {
-          if (quest == 'y') {
+          if (quest == '1') {
             char option;
             if (loopOption(option, adapterIdentifier)) {
-              if (option = 'y') {
+              if (option == '1') {
+                std::cout << "\n";
+                system(".\\venv\\Scripts\\python.exe -m main");
+                main();
+              } else if (option == '2') {
                 system("python -m venv venv");
                 system(".\\venv\\Scripts\\python.exe -m pip install --upgrade pip");
                 system(".\\venv\\Scripts\\python.exe -m pip install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128");
