@@ -24,7 +24,7 @@ ___
 
 ## Baixar modelos
 
-Para baixar o modelo de IA para gerar imagem existem varios sites, [CivitAi](https://civitiai.com/models) é um desses sites, nele eu recomendo que filtre por:
+Para baixar o modelo de IA para gerar imagem existem varios sites, [CivitAi](https://civitai.com/models) é um desses sites, nele eu recomendo que filtre por:
 
 |Model status: `Checkpoint` | Checkpoint type: `All` | File fomart: `SafeTensor`
 |---|---|---|
