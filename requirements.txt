@@ -9,5 +9,6 @@ accelerate
 safetensors
 
 # Utilidades
-Pillow
+pillow
 customtkinter
+pynvml

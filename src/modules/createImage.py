@@ -4,26 +4,27 @@ def hash_tensor(tensor):
   import hashlib
   return hashlib.sha256(tensor.cpu().numpy().tobytes()).hexdigest()
 
-def generate_click(torch, pipe, some_weight, prompt: str, negative_prompt: str, steps: int, cfg: float) -> Image | int:
+def generate_click(torch, pipe, some_weight, limit_temp: bool, prompt: str, negative_prompt: str, steps: int, cfg: float) -> Image | int:
   import psutil
   import os
+  from src.modules.coldGPU import safe_temp, reset_alert
 
   # Checagens de segurança
   if pipe is None:
-    from src.modules.popup import alert
-    alert("Erro: pipe não foi definido.")
+    from src.modules.popup import error
+    error("Erro: pipe não foi definido.")
     print("Erro: pipe não foi definido.")
     return 1
 
   if some_weight is None:
-    from src.modules.popup import alert
-    alert("Erro: some_weight não está definido.")
+    from src.modules.popup import error
+    error("Erro: some_weight não está definido.")
     print("Erro: some_weight não está definido.")
     return 1
 
   if not prompt.strip():
-    from src.modules.popup import alert
-    alert("Prompt não identificado.")
+    from src.modules.popup import error
+    error("Prompt não identificado.")
     print("Prompt não identificado.")
     return 1
 
@@ -35,6 +36,8 @@ def generate_click(torch, pipe, some_weight, prompt: str, negative_prompt: str, 
     print(f"\nStep {step_index+1} | Timestep: {timestep}")
     print(f"VRAM: {torch.cuda.memory_allocated() / 1024**3:.2f}GB")
     print(f"RAM: {psutil.Process(os.getpid()).memory_info().rss / 1024**3:.2f}GB")
+    if limit_temp:
+      safe_temp(pipe)
     return {}
 
   try:
@@ -45,6 +48,7 @@ def generate_click(torch, pipe, some_weight, prompt: str, negative_prompt: str, 
       guidance_scale=cfg,
       callback_on_step_end=listen_steps
     ).images[0]
+    reset_alert()
     print("Imagem gerada. Exibindo...")
     return image
 

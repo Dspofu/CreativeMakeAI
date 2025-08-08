@@ -2,7 +2,7 @@ from src.config import*
 from tkinter import filedialog
 
 # Função chamada ao clicar no botão
-def selecionar_modelo():
+def select_model():
   global setTorch, setPipe, some_weight
   model_path = filedialog.askopenfilename(
     title="Selecionar Modelo",
@@ -16,16 +16,32 @@ def selecionar_modelo():
     print("Carregando modelo.")
     setPipe = StableDiffusionXLPipeline.from_single_file(model_path, torch_dtype=torch.float16, variant="f16")
     print("Aplicando as otimizações.")
-    setTorch.backends.cuda.matmul.allow_tf32 = True
-    setPipe.enable_attention_slicing("auto")
-    setPipe.vae.enable_tiling()
-    setPipe.enable_model_cpu_offload()
-    some_weight = dict(setPipe.unet.state_dict())['conv_in.weight']
-    print("Pronto para instruções.")
+    try:
+      from src.modules.popup import alert
+      setTorch.backends.cuda.matmul.allow_tf32 = True
+      setPipe.enable_attention_slicing("auto")
+      setPipe.vae.enable_tiling()
+      setPipe.enable_model_cpu_offload()
+      setPipe.set_progress_bar_config(disable=False)
+      some_weight = dict(setPipe.unet.state_dict())['conv_in.weight']
+    except Exception as e:
+      print(e)
+      alert("Algo falhou, verifique a compatibilidade de CUDA e versão dos drivers.")
+  print("Pronto para instruções.")
 
-# Botão
-botao = ctk.CTkButton(window, text="Selecionar modelo", command=selecionar_modelo, font=("Arial", 12))
-botao.place(x=10, y=10)
+def active_temp_alert():
+  global limit_temp
+  limit_temp = not limit_temp
+
+# Selecionar modelo
+model_button = ctk.CTkButton(window, text="Selecionar modelo", command=select_model, font=("Arial", 12))
+model_button.place(x=10, y=10)
+
+# Botão de temperatura
+container_frame_temp = ctk.CTkFrame(window, fg_color=COR_FRAME, border_width=0)
+container_frame_temp.place(relx=1.1, rely=0.0, y=10, anchor="ne")
+ctk.CTkLabel(container_frame_temp, text="Alerta de temperatura", font=("Arial", 12), bg_color=COR_FRAME, text_color="white").pack(side="left", padx=(0, 5), pady=0)
+ctk.CTkCheckBox(container_frame_temp, text="", command=active_temp_alert, fg_color="#0070BA", hover_color="#004B8D", checkbox_width=20, checkbox_height=20, corner_radius=5, bg_color=COR_FRAME).pack(side="left", padx=0, pady=0)
 
 main_frame = ctk.CTkFrame(window, fg_color=COR_FRAME)
 main_frame.place(relx=0.5, rely=0.5, anchor="center")
@@ -75,9 +91,9 @@ from src.modules.createImage import generate_click
 
 def viwerImage():
   if setPipe is None or setTorch is None or some_weight is None:
-    from src.modules.popup import alert
-    return alert("Não houve modelo carregado.")
-  image = generate_click(setTorch, setPipe, some_weight, prompt_entry.get(), negative_prompt_entry.get("1.0", "end-1c") or negative_prompt, int(steps.get()), round(cfg.get(), 1))
+    from src.modules.popup import error
+    return error("Não houve modelo carregado.")
+  image = generate_click(setTorch, setPipe, some_weight, limit_temp, prompt_entry.get(), negative_prompt_entry.get("1.0", "end-1c") or negative_prompt, int(steps.get()), round(cfg.get(), 1))
   if image == 1:
     return 1
   else:
