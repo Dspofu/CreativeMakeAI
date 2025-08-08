@@ -41,8 +41,9 @@ model_button.place(x=10, y=10)
 container_frame_temp = ctk.CTkFrame(window, fg_color=COR_FRAME, border_width=0)
 container_frame_temp.place(relx=1.1, rely=0.0, y=10, anchor="ne")
 ctk.CTkLabel(container_frame_temp, text="Alerta de temperatura", font=("Arial", 12), bg_color=COR_FRAME, text_color="white").pack(side="left", padx=(0, 5), pady=0)
-ctk.CTkCheckBox(container_frame_temp, text="", command=active_temp_alert, fg_color="#0070BA", hover_color="#004B8D", checkbox_width=20, checkbox_height=20, corner_radius=5, bg_color=COR_FRAME).pack(side="left", padx=0, pady=0)
-
+chackBox = ctk.CTkCheckBox(container_frame_temp, text="", command=active_temp_alert, fg_color="#0070BA", hover_color="#004B8D", checkbox_width=20, checkbox_height=20, corner_radius=5, bg_color=COR_FRAME)
+chackBox.select(limit_temp)
+chackBox.pack(side="left", padx=0, pady=0)
 main_frame = ctk.CTkFrame(window, fg_color=COR_FRAME)
 main_frame.place(relx=0.5, rely=0.5, anchor="center")
 
