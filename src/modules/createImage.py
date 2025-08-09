@@ -37,8 +37,8 @@ def generate_click(torch, pipe, some_weight, limit_temp: bool, prompt: str, nega
     print(f"VRAM: {torch.cuda.memory_allocated() / 1024**3:.2f}GB")
     print(f"RAM: {psutil.Process(os.getpid()).memory_info().rss / 1024**3:.2f}GB")
     if limit_temp:
-      safe_temp(pipe)
-    return {}
+      safe_temp(pipe=pipe_instance)
+    return callback_kwargs
 
   try:
     image = pipe(

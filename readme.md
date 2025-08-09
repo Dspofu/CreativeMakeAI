@@ -40,7 +40,8 @@ ___
 
 - Python: `3.13.1`
 - pip: `25.1.1`
-- GPU Nvidia: `RTX 3060 12GB` • OBS: `RTX 3050 8GB > GTX 1080 TI 11GB`
+- GPU Nvidia: `RTX 2060 super` • OBS: `RTX 3050 8GB > GTX 1080 TI 11GB`
+- RAM: (2x16) 32GB - 3200MHz
 
 > Dica: em uma placa de video os modelos de IA tem um bom desempenho naquelas que possuem um alto numero de `tensor cores`, `Vram` e uma boa `arquitetura`, eu diria que se você é uma amante dessa área, que você use então modelos `RTX` que possuem no `mínimo 12GB de vram` para voce poder fugir para modelos ainda maiores que `15GB`
 
@@ -68,7 +69,7 @@ ___
 |Hardware|Fabricante|Modelo|
 |:---:|:---:|:---|
 |OS|Microsoft|Windows 10 Pro 'Latest'|
-|CPU|AMD/Intel/'others'|2.3GHz 2/4|
+|CPU|AMD/Intel/'others'|3.0GHz 2/4|
 |RAM|HyperX/'others'|32GB 3200MHz|
 |GPU|Nvidia|RTX 2060 Super 8GB|
 |SSD|Kingspec/SanDisk/'others'|240GB 5000Mb/s|

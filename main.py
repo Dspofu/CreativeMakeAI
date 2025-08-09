@@ -13,7 +13,9 @@ def select_model():
     import torch
     from diffusers import StableDiffusionXLPipeline
     setTorch = torch
+    # import os
     print("Carregando modelo.")
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     setPipe = StableDiffusionXLPipeline.from_single_file(model_path, torch_dtype=torch.float16, variant="f16")
     print("Aplicando as otimizações.")
     try:
