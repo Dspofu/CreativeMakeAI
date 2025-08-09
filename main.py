@@ -3,33 +3,37 @@ from tkinter import filedialog
 
 # Função chamada ao clicar no botão
 def select_model():
-  global setTorch, setPipe, some_weight
-  model_path = filedialog.askopenfilename(
-    title="Selecionar Modelo",
-    filetypes=[("Modelos .safetensors", "*.safetensors")]
-  )
-  if model_path:
-    print("Iniciando pacotes.")
-    import torch
-    from diffusers import StableDiffusionXLPipeline
-    setTorch = torch
-    # import os
-    print("Carregando modelo.")
-    # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-    setPipe = StableDiffusionXLPipeline.from_single_file(model_path, torch_dtype=torch.float16, variant="f16")
-    print("Aplicando as otimizações.")
-    try:
-      from src.modules.popup import alert
-      setTorch.backends.cuda.matmul.allow_tf32 = True
-      setPipe.enable_attention_slicing("auto")
-      setPipe.vae.enable_tiling()
-      setPipe.enable_model_cpu_offload()
-      setPipe.set_progress_bar_config(disable=False)
-      some_weight = dict(setPipe.unet.state_dict())['conv_in.weight']
-    except Exception as e:
-      print(e)
-      alert("Algo falhou, verifique a compatibilidade de CUDA e versão dos drivers.")
-  print("Pronto para instruções.")
+  def worker():
+    global setTorch, setPipe, some_weight
+    model_path = filedialog.askopenfilename(
+      title="Selecionar Modelo",
+      filetypes=[("Modelos .safetensors", "*.safetensors")]
+    )
+    if model_path:
+      model_button.configure(state="disabled")
+      print("Iniciando pacotes.")
+      import torch
+      from diffusers import StableDiffusionXLPipeline
+      setTorch = torch
+      # import os
+      print("Carregando modelo.")
+      # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+      setPipe = StableDiffusionXLPipeline.from_single_file(model_path, torch_dtype=torch.float16, variant="f16")
+      print("Aplicando as otimizações.")
+      try:
+        from src.modules.popup import alert
+        setTorch.backends.cuda.matmul.allow_tf32 = True
+        setPipe.enable_attention_slicing("auto")
+        setPipe.vae.enable_tiling()
+        setPipe.enable_model_cpu_offload()
+        setPipe.set_progress_bar_config(disable=False)
+        some_weight = dict(setPipe.unet.state_dict())['conv_in.weight']
+      except Exception as e:
+        print(e)
+        alert("Algo falhou, verifique a compatibilidade de CUDA e versão dos drivers.")
+    model_button.configure(state="normal")
+    print("Pronto para instruções.")
+  threading.Thread(target=worker, daemon=True).start()
 
 def active_temp_alert():
   global limit_temp
@@ -92,22 +96,31 @@ cfg.pack(anchor="w", padx=0, pady=(0, 20))
 # Função de clique para gerar imagem
 from src.modules.createImage import generate_click
 
+def new_image_window(image):
+  image_window = ctk.CTkToplevel(window)
+  image_window.title("Imagem Gerada")
+  image_window.geometry("1024x1024")
+  image_window.resizable(False, False)
+  image_window.configure(fg_color=COR_BG_JANELA)
+  ctk_image = ctk.CTkImage(light_image=image, dark_image=image, size=(1024, 1024))
+  image_label = ctk.CTkLabel(image_window, image=ctk_image, text="")
+  image_label.pack(expand=True, fill="both")
+
 def viwerImage():
   if setPipe is None or setTorch is None or some_weight is None:
     from src.modules.popup import error
     return error("Não houve modelo carregado.")
-  image = generate_click(setTorch, setPipe, some_weight, limit_temp, prompt_entry.get(), negative_prompt_entry.get("1.0", "end-1c") or negative_prompt, int(steps.get()), round(cfg.get(), 1))
-  if image == 1:
-    return 1
-  else:
-    image_window = ctk.CTkToplevel(window)
-    image_window.title("Imagem Gerada")
-    image_window.geometry("1024x1024")
-    image_window.resizable(False, False)
-    image_window.configure(fg_color=COR_BG_JANELA)
-    ctk_image = ctk.CTkImage(light_image=image, dark_image=image, size=(1024, 1024))
-    image_label = ctk.CTkLabel(image_window, image=ctk_image, text="")
-    image_label.pack(expand=True, fill="both")
+  generate_button.configure(state="disabled")
+
+  def worker():
+    image = generate_click(setTorch, setPipe, some_weight, limit_temp, prompt_entry.get(), negative_prompt_entry.get("1.0", "end-1c") or negative_prompt, int(steps.get()), round(cfg.get(), 1))
+    if image == 1:
+      return 1
+    window.after(0, lambda: new_image_window(image))
+    generate_button.configure(state="normal")
+
+  threading.Thread(target=worker, daemon=True).start()
+      
 
 # Botão Gerar
 generate_button = ctk.CTkButton(

@@ -1,5 +1,6 @@
 import tkinter as tk
 import customtkinter as ctk
+import threading
 
 # Configurações para o modelo
 setTorch = None
