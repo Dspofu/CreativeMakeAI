@@ -1,6 +1,6 @@
 import pynvml
-import time
 from src.modules.popup import alert
+import time
 
 critical_temp = False
 

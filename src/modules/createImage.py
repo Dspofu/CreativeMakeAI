@@ -1,10 +1,10 @@
-from tkinter import Image
+from tkinter import Image, Button
 
 def hash_tensor(tensor):
   import hashlib
   return hashlib.sha256(tensor.cpu().numpy().tobytes()).hexdigest()
 
-def generate_click(torch, pipe, some_weight, limit_temp: bool, prompt: str, negative_prompt: str, steps: int, cfg: float) -> Image | int:
+def generate_click(generate_button: Button, torch, pipe, some_weight, limit_temp: bool, prompt: str, negative_prompt: str, steps: int, cfg: float) -> Image | int:
   import psutil
   import os
   from src.modules.coldGPU import safe_temp, reset_alert
@@ -36,6 +36,7 @@ def generate_click(torch, pipe, some_weight, limit_temp: bool, prompt: str, nega
     print(f"\nStep {step_index+1} | Timestep: {timestep}")
     print(f"VRAM: {torch.cuda.memory_allocated() / 1024**3:.2f}GB")
     print(f"RAM: {psutil.Process(os.getpid()).memory_info().rss / 1024**3:.2f}GB")
+    generate_button.configure(text=f"Gerando imagem: {step_index+1}/{steps}")
     if limit_temp:
       safe_temp(pipe=pipe_instance)
     return callback_kwargs
@@ -49,7 +50,7 @@ def generate_click(torch, pipe, some_weight, limit_temp: bool, prompt: str, nega
       callback_on_step_end=listen_steps
     ).images[0]
     reset_alert()
-    print("Imagem gerada. Exibindo...")
+    print("Imagem gerada...")
     return image
 
   except Exception as e:

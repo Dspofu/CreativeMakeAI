@@ -12,12 +12,13 @@ steps = 28
 cfg = 4.5
 
 # Paleta de cores mantida
-COR_BG_JANELA = "#1e1e2f"
 COR_FRAME = "#1e1e2f"
 COR_INPUT = "#1a1a28"
 COR_TEXTO = "#FFFFFF"
-COR_BOTAO = "#4e4e6a"
-COR_BOTAO_HOVER = "#5e5e7f"
+COR_BOTAO = "#0070BA"
+COR_BOTAO_HOVER = "#004B8D"
+COR_BOTAO_IMAGE = "#009900"
+COR_BOTAO_IMAGE_HOVER = "#008800"
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -26,4 +27,4 @@ window = ctk.CTk()
 window.title("v1.0.0@BETA - CreativeMakeAI")
 window.geometry("700x600")
 window.resizable(False, False)
-window.configure(fg_color=COR_BG_JANELA)
+window.configure(fg_color=COR_FRAME)
