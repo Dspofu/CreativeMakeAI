@@ -1,12 +1,17 @@
+import ctypes
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('dspofu.creativemakeai.1.0' )
+
 import tkinter as tk
 import customtkinter as ctk
 import threading
+from PIL import Image, ImageTk
+from src.modules.popup import*
 
 # Configurações para o modelo
 setTorch = None
 setPipe = None
-some_weight = None
 limit_temp = True
+loaded_loras = {}
 negative_prompt = "blurry, low quality, low resolution, out of focus, overexposed, underexposed, grainy, distorted, watermark, text, signature, frame, oversaturated, unrealistic proportions, deformed anatomy, incorrect limb positioning, broken hands, extra fingers, overlapping limbs, blurred eyes, unrealistic facial features, extra limbs, missing body parts, messy background, crowded composition, noise, compression artifacts, cartoonish, overly stylized, unnatural poses, distorted perspectives, unnatural lighting, disproportionate body parts, body parts passing through clothing, clothing blending into skin, unnatural folds in clothing, floating accessories, misaligned clothing, warped fabric, inconsistent textures in clothing, skeleton visible through clothing, unintentionally see-through clothing, excessive wrinkles, unrealistic body-cloth interactions"
 steps = 28
 cfg = 4.5
@@ -23,8 +28,13 @@ COR_BOTAO_IMAGE_HOVER = "#008800"
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-window = ctk.CTk()
-window.title("v1.0.0@BETA - CreativeMakeAI")
-window.geometry("700x600")
-window.resizable(False, False)
-window.configure(fg_color=COR_FRAME)
+try:
+  window = ctk.CTk()
+  window.title("v1.0.0@BETA - CreativeMakeAI")
+  window.iconbitmap('assets\\images\\icon.ico')
+  window.geometry("850x700")
+  window.resizable(False, False)
+  window.configure(fg_color=COR_FRAME)
+except Exception as e:
+  error(f"Erro na inicialização da janela: {e}")
+  print(f"Erro na inicialização da janela: {e}")

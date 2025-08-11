@@ -4,7 +4,6 @@ import psutil
 import os
 import tkinter as tk
 from diffusers import StableDiffusionXLPipeline
-from safetensors.torch import load_file
 from PIL import ImageTk, Image
 
 def hash_tensor(tensor):
