@@ -28,6 +28,17 @@ Para instalar e fazer uma breve verificação execute o arquivo `nvidia-gpu-5.0p
 A aplicação só vai funcionar caso possua uma placa de video `GPU - Nvidia` que tenha a *capacidade computacional* superior a `5.0`, por um requisito da versão do **cuda toolkit**.<br>
 Caso queria saber a capacidade computacional de sua placa de video você pode consultar no [site da Nvidia](https://developer.nvidia.com/cuda-gpus).
 
+___
+
+## Após tiver tudo baixado é só iniciar
+
+<image src="assets/images/example.png" style="width: 350px">
+
+- Sistema de `Alerta de temperatura` funciona como um recurso de espera, conforme esquenta ela espera para gerar a próxima etapa.
+- Os modelos LoRA's devem ser selecionados para alterar a sua escala.
+
+___
+
 #### Baixar os pacotes da aplicação. 
 
 Seria ideal ler antes as [**recomendações**](#recomendações)
@@ -49,8 +60,6 @@ Para baixar o modelo de IA para gerar imagem existem varios sites, [CivitAi](htt
 
 Após baixar o modelo, procure tambem as especificações de configuração recomendada para ele para depois inserir na aplicação.
 OBS: Geralmente os modelos tem de 3GB a 15GB, então não se assuste com o tamanho do arquivo que foi baixado.
-
-> Até o momento não tem compatibilidade com o modelo `LoRa`
 
 ___
 

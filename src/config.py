@@ -28,13 +28,13 @@ COR_BOTAO_IMAGE_HOVER = "#008800"
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
+window = ctk.CTk()
+window.title("v1.0.0@BETA - CreativeMakeAI")
+window.geometry("500x700")
+window.resizable(False, False)
+window.configure(fg_color=COR_FRAME)
 try:
-  window = ctk.CTk()
-  window.title("v1.0.0@BETA - CreativeMakeAI")
-  window.iconbitmap('assets\\images\\icon.ico')
-  window.geometry("500x700")
-  window.resizable(False, False)
-  window.configure(fg_color=COR_FRAME)
+  window.iconbitmap('assets\\images\\icon_24px.ico')
 except Exception as e:
   error(f"Erro na inicialização da janela: {e}")
   print(f"Erro na inicialização da janela: {e}")

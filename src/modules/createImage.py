@@ -1,10 +1,11 @@
+import random
 from tkinter import Image, Button
 
 def hash_tensor(tensor):
   import hashlib
   return hashlib.sha256(tensor.cpu().numpy().tobytes()).hexdigest()
 
-def generate_click(generate_button: Button, torch, pipe, limit_temp: bool, prompt: str, negative_prompt: str, steps: int, cfg: float, lora_scale) -> Image | int:
+def generate_click(generate_button: Button, torch, pipe, limit_temp: bool, prompt: str, negative_prompt: str, steps: int, cfg: float, lora_scale, seed) -> Image | int:
   import psutil
   import os
   from src.modules.coldGPU import safe_temp, reset_alert
@@ -30,18 +31,28 @@ def generate_click(generate_button: Button, torch, pipe, limit_temp: bool, promp
     return callback_kwargs
 
   try:
+    if seed is None or seed == -1:
+      seed = random.randint(0, 2**32 - 1)
+      print(f"Seed aleatória: {seed}")
+    else:
+      print(f"Usando a seed: {seed}")
+
+    generator = torch.Generator(device="cuda").manual_seed(seed)
     image = pipe(
       prompt=prompt,
       negative_prompt=negative_prompt,
       num_inference_steps=steps,
       guidance_scale=cfg,
       cross_attention_kwargs={"scale": lora_scale},
-      callback_on_step_end=listen_steps
+      callback_on_step_end=listen_steps,
+      generator=generator,
     ).images[0]
+
+    used_seed = generator.initial_seed()
     reset_alert()
-    print("Imagem gerada.")
-    return image
+    print(f"Imagem gerada | Seed: {used_seed}")
+    return image, used_seed
 
   except Exception as e:
     print(f"Ocorreu um erro: {e}")
-    return 1
+    return 1, -1 

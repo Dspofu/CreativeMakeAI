@@ -148,13 +148,21 @@ def viwerImage():
 
       generate_button.configure(text="Carregando modelo na memória")
       from src.modules.createImage import generate_click
-      image = generate_click(
+      try:
+        seed_value = int(seed_entry.get())
+      except (ValueError, TypeError):
+        seed_value = -1
+      result = generate_click(
         generate_button, setTorch, setPipe, limit_temp, 
-        prompt_entry.get(), negative_prompt_entry.get("1.0", "end-1c") or negative_prompt, 
+        prompt_entry.get("1.0", "end-1c"), negative_prompt_entry.get("1.0", "end-1c") or negative_prompt, 
         int(steps.get()), round(cfg.get(), 1),
-        lora_strength
+        lora_strength,
+        seed=seed_value,
       )
-      if image == 1: return
+      if result[0] == 1: return
+      image, used_seed = result
+      # seed_entry.delete(0, "end")
+      # seed_entry.insert(0, str(used_seed))
       window.after(0, lambda: new_image_window(image))
     except Exception as e:
       error(f"Ocorreu um erro na geração:\n{e}")
@@ -172,13 +180,13 @@ model_button.place(x=10, y=10)
 container_frame_temp = ctk.CTkFrame(window, fg_color=COR_FRAME, border_width=0)
 container_frame_temp.place(relx=1.0, rely=0.0, y=10, anchor="ne")
 ctk.CTkLabel(container_frame_temp, text="Alerta de temperatura", font=("Arial", 12), bg_color=COR_FRAME, text_color="white").pack(side="left", padx=(0, 5))
-chackBox = ctk.CTkCheckBox(container_frame_temp, text="", command=active_temp_alert, fg_color=COR_BOTAO, hover_color=COR_BOTAO_HOVER, checkbox_width=20, checkbox_height=20, corner_radius=5, bg_color=COR_FRAME)
-chackBox.select(limit_temp)
-chackBox.pack(side="left", padx=0, pady=0)
+checkBox = ctk.CTkCheckBox(container_frame_temp, text="", command=active_temp_alert, fg_color=COR_BOTAO, hover_color=COR_BOTAO_HOVER, checkbox_width=20, checkbox_height=20, corner_radius=5, bg_color=COR_FRAME)
+checkBox.select(limit_temp)
+checkBox.pack(side="left", padx=0)
 
 # Container inputs
 main_frame = ctk.CTkFrame(window, fg_color=COR_FRAME)
-main_frame.place(relx=0.5, rely=0.52, anchor="center")
+main_frame.place(relx=0.5, rely=0.54, anchor="center")
 
 # Prompt
 ctk.CTkLabel(main_frame, text="Prompt:", font=("Arial", 14)).pack(anchor="w", padx=0, pady=0)
@@ -194,16 +202,24 @@ negative_prompt_entry.pack(padx=0, pady=(0, 20), fill="both", expand=True)
 # Steps
 steps_label = ctk.CTkLabel(main_frame, text="Steps: 28", font=("Arial", 14))
 steps_label.pack(anchor="w", padx=0, pady=(0, 5))
-steps = ctk.CTkSlider(master=main_frame, from_=1, to=100, command=lambda value: steps_label.configure(text=f"Steps: {int(value)}"), width=400)
+steps = ctk.CTkSlider(master=main_frame, from_=1, to=100, command=lambda value: steps_label.configure(text=f"Steps: {int(value)}"))
 steps.set(28)
-steps.pack(anchor="w", padx=0, pady=(0, 20))
+steps.pack(anchor="w", padx=0, pady=(0, 20), fill="both")
 
 # CFG Scale
 cfg_label = ctk.CTkLabel(main_frame, text="CFG Scale: 4.5", font=("Arial", 14))
 cfg_label.pack(anchor="w", padx=0, pady=(0, 5))
-cfg = ctk.CTkSlider(master=main_frame, from_=0.5, to=30, command=lambda value: cfg_label.configure(text=f"CFG Scale: {round(value, 1)}"), width=400)
+cfg = ctk.CTkSlider(master=main_frame, from_=0.5, to=30, command=lambda value: cfg_label.configure(text=f"CFG Scale: {round(value, 1)}"))
 cfg.set(4.5)
-cfg.pack(anchor="w", padx=0, pady=(0, 20))
+cfg.pack(anchor="w", padx=0, pady=(0, 20), fill="both")
+
+seed_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+seed_frame.pack(anchor="w", padx=0, pady=(0, 20))
+
+ctk.CTkLabel(seed_frame, text="Seed:", font=("Arial", 14)).pack(side="left", padx=(0,10))
+seed_entry = ctk.CTkEntry(seed_frame, width=150, font=("Arial", 14), fg_color=COR_INPUT, text_color=COR_TEXTO, border_width=0, corner_radius=8)
+seed_entry.pack(side="left")
+seed_entry.insert(0, "-1")
 
 # Container LoRA's
 container_lora = ctk.CTkFrame(main_frame, fg_color=COR_FRAME)
@@ -229,7 +245,7 @@ def update_lora_scale(v):
     loaded_loras[selected_lora]["cfg"] = rounded_value
     lora_label.configure(text=f"LoRA Scale: {rounded_value}")
 
-lora_scale = ctk.CTkSlider(lora_control_frame, from_=0.1, to=1.0, command=update_lora_scale, width=150)
+lora_scale = ctk.CTkSlider(lora_control_frame, from_=0.1, to=1.0, command=update_lora_scale)
 lora_scale.set(0.75)
 lora_scale.pack(side="left")
 
@@ -242,8 +258,8 @@ lora_listbox = ctk.CTkComboBox(lora_list_frame, values=[], width=300, command=li
 lora_listbox.pack(side="left", padx=(0, 10), pady=(0, 10))
 
 # Botão para remover LoRA
-remove_lora_button = ctk.CTkButton(lora_list_frame, text="Remover", command=unload_lora, width=80)
-remove_lora_button.pack(side="left", pady=(0, 10))
+remove_lora_button = ctk.CTkButton(lora_list_frame, text="Remover", command=unload_lora)
+remove_lora_button.pack(side="left", pady=(0, 10), fill="both")
 
 # Botão Gerar Imagem
 generate_button = ctk.CTkButton(main_frame, text="Gerar Imagem", command=viwerImage, state="disabled", font=("Arial", 14, "bold"), fg_color=COR_BOTAO_IMAGE, hover_color=COR_BOTAO_IMAGE_HOVER, height=40, corner_radius=8)
