@@ -1,4 +1,4 @@
-@echo off
-title intaller CreativeMakeAI
+@REM @echo off
+title installer CreativeMakeAI
 .\installer_start.exe
 pause

@@ -32,7 +32,7 @@ try:
   window = ctk.CTk()
   window.title("v1.0.0@BETA - CreativeMakeAI")
   window.iconbitmap('assets\\images\\icon.ico')
-  window.geometry("850x700")
+  window.geometry("500x700")
   window.resizable(False, False)
   window.configure(fg_color=COR_FRAME)
 except Exception as e:

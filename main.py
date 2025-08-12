@@ -178,12 +178,12 @@ chackBox.pack(side="left", padx=0, pady=0)
 
 # Container inputs
 main_frame = ctk.CTkFrame(window, fg_color=COR_FRAME)
-main_frame.place(relx=0.5, rely=0.5, anchor="center")
+main_frame.place(relx=0.5, rely=0.52, anchor="center")
 
 # Prompt
-ctk.CTkLabel(main_frame, text="Prompt:", font=("Arial", 14)).pack(anchor="w", padx=0, pady=(20, 5))
-prompt_entry = ctk.CTkEntry(main_frame, width=400, height=40, font=("Arial", 14), fg_color=COR_INPUT, text_color=COR_TEXTO, border_width=0, corner_radius=8)
-prompt_entry.pack(padx=0, pady=(0, 20))
+ctk.CTkLabel(main_frame, text="Prompt:", font=("Arial", 14)).pack(anchor="w", padx=0, pady=0)
+prompt_entry = ctk.CTkTextbox(main_frame, width=400, height=80, font=("Arial", 14), fg_color=COR_INPUT, text_color=COR_TEXTO, border_width=0, corner_radius=8)
+prompt_entry.pack(padx=0, pady=(0, 20), fill="both", expand=True)
 
 # Prompt Negativo
 ctk.CTkLabel(main_frame, text="Prompt Negativo:", font=("Arial", 14)).pack(anchor="w", padx=0, pady=(0, 5))
