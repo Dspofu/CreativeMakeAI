@@ -32,8 +32,7 @@ ___
 
 ## Após tiver tudo baixado é só iniciar
 
-<video src="assets/images/example.mp4"></video>
-<!-- <image src="assets/images/example.gif" style="width: 1920px"> -->
+<image src="assets/images/example.gif">
 
 - Sistema de `Alerta de temperatura` funciona como um recurso de espera, conforme esquenta ela espera para gerar a próxima etapa.
 - Os modelos LoRA's devem ser selecionados para alterar a sua escala.
