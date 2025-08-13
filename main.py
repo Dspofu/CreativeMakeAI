@@ -133,6 +133,19 @@ def new_image_window(image):
 def viwerImage():
   def worker():
     global setPipe
+
+    # Checagens de segurança
+    if setPipe is None:
+      from src.modules.popup import error
+      error("Erro: pipe não foi definido.")
+      print("Erro: pipe não foi definido.")
+      return 1
+
+    if not prompt_entry.get("1.0", "end-1c").strip():
+      from src.modules.popup import error
+      error("Prompt não identificado.")
+      print("Prompt não identificado.")
+      return 1
     generate_button.configure(state="disabled", text="Configurando ambiente")
     selected_lora_name = lora_listbox.get()
     lora_to_apply = loaded_loras.get(selected_lora_name)
@@ -152,13 +165,7 @@ def viwerImage():
         seed_value = int(seed_entry.get())
       except (ValueError, TypeError):
         seed_value = -1
-      result = generate_click(
-        generate_button, setTorch, setPipe, limit_temp, 
-        prompt_entry.get("1.0", "end-1c"), negative_prompt_entry.get("1.0", "end-1c") or negative_prompt, 
-        int(steps.get()), round(cfg.get(), 1),
-        lora_strength,
-        seed=seed_value,
-      )
+      result = generate_click(generate_button, setTorch, setPipe, limit_temp, prompt_entry.get("1.0", "end-1c"), negative_prompt_entry.get("1.0", "end-1c") or negative_prompt, int(steps.get()), round(cfg.get(), 1), lora_strength, seed=seed_value)
       if result[0] == 1: return
       image, used_seed = result
       # seed_entry.delete(0, "end")

@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='CreativeMakeAI',
+    name='main',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -36,16 +36,4 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon=['assets\\images\\icon.ico'],
-    version='file_version.txt'
-)
-
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    name='main',
 )

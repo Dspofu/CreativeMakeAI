@@ -10,19 +10,6 @@ def generate_click(generate_button: Button, torch, pipe, limit_temp: bool, promp
   import os
   from src.modules.coldGPU import safe_temp, reset_alert
 
-  # Checagens de segurança
-  if pipe is None:
-    from src.modules.popup import error
-    error("Erro: pipe não foi definido.")
-    print("Erro: pipe não foi definido.")
-    return 1
-
-  if not prompt.strip():
-    from src.modules.popup import error
-    error("Prompt não identificado.")
-    print("Prompt não identificado.")
-    return 1
-
   def listen_steps(pipe_instance, step_index, timestep, callback_kwargs) -> dict:
     print(f"Timestep: {timestep} | VRAM: {torch.cuda.memory_allocated() / 1024**3:.2f}GB | RAM: {psutil.Process(os.getpid()).memory_info().rss / 1024**3:.2f}GB | Steps: {step_index+1}/{steps}   ", end=("\r" if step_index < steps - 1 else '\n'), flush=True)
     generate_button.configure(text=f"Progresso: {step_index+1}/{steps}")
