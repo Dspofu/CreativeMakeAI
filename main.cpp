@@ -40,7 +40,7 @@ int main() {
   if (d3d) {
     D3DADAPTER_IDENTIFIER9 adapterIdentifier;
     if (SUCCEEDED(d3d->GetAdapterIdentifier(D3DADAPTER_DEFAULT, 0, &adapterIdentifier))) {
-      if (adapterIdentifier.VendorId != 0x10DE) {
+      if (adapterIdentifier.VendorId == 0x10DE) {
         if (GlobalMemoryStatusEx(&memInfo)) {
           int memory = std::round(memInfo.ullTotalPhys / (1024.0f * 1024.0f * 1024.0f));
           if (memory <= 8) {
