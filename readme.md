@@ -1,6 +1,10 @@
 ## Instalação
 
-Clone o repositório ou [clique aqui](https://github.com/Dspofu/CreativeMakeAI/archive/refs/heads/main.zip) para baixar o zip
+Clone o repositório ou [clique aqui](https://github.com/Dspofu/CreativeMakeAI/releases/download/1.0.0/installer_start.exe) para baixar o instalador
+
+- O programa de instalação é seguro, mas não possui um certificado indexado, por isso o seu OS pode detecta-lo como possivel ameaça.
+
+Na instalação é só fazer oque for mais correspondentes as opções, na segunda etapa você deve escolher a ultima opção para baixar os arquivos do programa caso não tenha baixado do github via `.zip`.
 
 ```batch
 git clone https://github.com/Dspofu/CreativeMakeAI.git
@@ -12,7 +16,7 @@ git clone https://github.com/Dspofu/CreativeMakeAI.git
 Comando para build do `.cpp`
 
 ```batch
-g++ -static -static-libgcc -static-libstdc++ main.cpp -o installer_start.exe -ld3d9
+g++ -static main.cpp -o installer_start.exe -lole32 -loleaut32 -luuid -lshell32 -lshlwapi -lwininet -static-libgcc -static-libstdc++ -ld3d9
 ```
 
 Comando para build do `.py`
@@ -30,7 +34,7 @@ Caso queria saber a capacidade computacional de sua placa de video você pode co
 
 ___
 
-## Após tiver tudo baixado é só iniciar
+## Após ter tudo baixado é só iniciar
 
 <image src="assets/images/example.gif">
 

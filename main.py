@@ -27,9 +27,12 @@ def select_model():
     try:
       setPipe = StableDiffusionXLPipeline.from_single_file(model_path, torch_dtype=torch.float16, variant="fp16")
       print("Aplicando as otimizações.")
-      torch.backends.cuda.matmul.allow_tf32 = True
+      setTorch.backends.cuda.matmul.allow_tf32 = True
       setPipe.enable_attention_slicing("auto")
       setPipe.vae.enable_tiling()
+      setPipe.vae.to(dtype=setTorch.float16)
+      setPipe.unet.to(memory_format=setTorch.channels_last)
+      # setPipe.unet = torch.compile(setPipe.unet, mode="reduce-overhead", fullgraph=True)
       setPipe.enable_model_cpu_offload()
       setPipe.set_progress_bar_config(disable=True)
       model_button.configure(state="normal", text="Modelo carregado")
