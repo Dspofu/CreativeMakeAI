@@ -8,12 +8,14 @@ def reset_alert():
   global critical_temp
   critical_temp = False
 
-def safe_temp(pipe, gpu: int = 0):
+def safe_temp(pipe, temp_label, gpu: int = 0):
   global critical_temp
   try:
     pynvml.nvmlInit()
     handle = pynvml.nvmlDeviceGetHandleByIndex(gpu)
     temp = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
+
+    temp_label.configure(text=f"{temp}°C")
 
     if temp >= 90:
       # pipe.enable_sequential_cpu_offload()

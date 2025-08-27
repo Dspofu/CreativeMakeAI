@@ -13,8 +13,6 @@ setPipe = None
 limit_temp = True
 loaded_loras = {}
 negative_prompt = "blurry, low quality, low resolution, out of focus, overexposed, underexposed, grainy, distorted, watermark, text, signature, frame, oversaturated, unrealistic proportions, deformed anatomy, incorrect limb positioning, broken hands, extra fingers, overlapping limbs, blurred eyes, unrealistic facial features, extra limbs, missing body parts, messy background, crowded composition, noise, compression artifacts, cartoonish, overly stylized, unnatural poses, distorted perspectives, unnatural lighting, disproportionate body parts, body parts passing through clothing, clothing blending into skin, unnatural folds in clothing, floating accessories, misaligned clothing, warped fabric, inconsistent textures in clothing, skeleton visible through clothing, unintentionally see-through clothing, excessive wrinkles, unrealistic body-cloth interactions"
-steps = 28
-cfg = 4.5
 
 # Paleta de cores mantida
 COR_FRAME = "#1e1e2f"
@@ -23,6 +21,7 @@ COR_TEXTO = "#FFFFFF"
 COR_BOTAO = "#0070BA"
 COR_BOTAO_HOVER = "#004B8D"
 COR_BOTAO_IMAGE = "#009900"
+COR_BOTAO_IMAGE_CANCEL = "#DB0909"
 COR_BOTAO_IMAGE_HOVER = "#008800"
 
 ctk.set_appearance_mode("dark")

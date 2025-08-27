@@ -11,118 +11,15 @@
 #include <filesystem>
 #include <d3d9.h>
 
+#include "src/modules/unzip.h"
+#include "src/modules/progress.h"
+#include "src/modules/options.h"
+
 #pragma comment(lib, "wininet.lib")
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "shell32.lib")
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "shlwapi.lib")
-
-bool loopQuest(char& quest) {
-  system("cls");
-  std::cout << "Verifique se este dispositivo possui o Python na versão 3.12.0 ou superior.\n\nVersão encontrada: ";
-  system("python --version");
-  std::cout << "\nConfirme se ele foi encontrado:\n[0] - Fechar\n[1] - Sim possuo\n[2] - Instalar Python\n\n> ";
-  std::cin >> quest;
-  if (quest != '0' && quest != '1' && quest != '2') return loopQuest(quest);
-  else return true;
-}
-
-void loopOption(D3DADAPTER_IDENTIFIER9 adapterIdentifier, int memory) {
-  system("cls");
-  std::wstringstream ss;
-  ss << L"Memória RAM: " << memory << L"GB o ideal seria ter 32GB de RAM";
-  if (memory < 18) MessageBoxW(NULL, ss.str().c_str(), L"Pouca RAM no sistema", MB_ICONWARNING);
-  else std::cout << "Memória RAM: " << memory << "GB" << std::endl;
-  wprintf(L"GPU: %s\n\nAgora escolha entre instalar os pacotes ou iniciar:\n[0] - Fechar\n[1] - Iniciar programa\n[2] - Instalar pacotes\n[3] - *Baixar projeto*\n\n> ", adapterIdentifier.Description);
-}
-
-void option2() {
-  system("python -m venv venv");
-  system(".\\venv\\Scripts\\python.exe -m pip install --upgrade pip");
-  system(".\\venv\\Scripts\\python.exe -m pip install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128");
-  system(".\\venv\\Scripts\\python.exe -m pip install -r requirements.txt");
-  system(".\\venv\\Scripts\\python.exe -m pip list");
-  printf("\nInicialize o venv para testar.\n");
-}
-
-void printProgressBar(int percent) {
-  const int barWidth = 50;
-  int pos = (percent * barWidth) / 100;
-
-  printf("\r[");
-  for (int i = 0; i < barWidth; i++) {
-    if (i < pos) printf("▒");
-    else if (i == pos) printf("▓");
-    else printf("░");
-  }
-  printf("] %d%%", percent);
-  fflush(stdout);
-}
-
-int unzip() {
-  std::filesystem::path path = std::filesystem::current_path();
-  std::filesystem::path file = path;
-  file /= "project.zip";
-  const wchar_t* zipPath = file.c_str();
-  CoInitialize(NULL);
-
-  IShellDispatch* pShell = NULL;
-  Folder* pZip = NULL;
-  Folder* pDest = NULL;
-
-  HRESULT hr = CoCreateInstance(CLSID_Shell, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pShell));
-
-  if (FAILED(hr)) {
-    printf("Erro ao iniciar Shell\n");
-    return 1;
-  }
-
-  VARIANT vZip, vDest, vOpt;
-  VariantInit(&vZip);
-  VariantInit(&vDest);
-  VariantInit(&vOpt);
-
-  vZip.vt = VT_BSTR;
-  vZip.bstrVal = SysAllocString(zipPath);
-
-  vDest.vt = VT_BSTR;
-  vDest.bstrVal = SysAllocString(path.c_str());
-
-  pShell->NameSpace(vZip, &pZip);
-  pShell->NameSpace(vDest, &pDest);
-
-  if (!pZip || !pDest) {
-    std::cout << pZip << "  " << pDest << std::endl;
-    printf("Erro ao abrir ZIP ou pasta destino\n");
-    return 1;
-  }
-
-  FolderItems* pItems = NULL;
-  pZip->Items(&pItems);
-
-  VARIANT vItem;
-  VariantInit(&vItem);
-  vItem.vt = VT_DISPATCH;
-  vItem.pdispVal = pItems;
-
-  vOpt.vt = VT_I4;
-  vOpt.lVal = FOF_NOCONFIRMATION | FOF_SILENT;
-
-  pDest->CopyHere(vItem, vOpt);
-
-  SysFreeString(vZip.bstrVal);
-  SysFreeString(vDest.bstrVal);
-
-  if (pItems) pItems->Release();
-  if (pZip) pZip->Release();
-  if (pDest) pDest->Release();
-  if (pShell) pShell->Release();
-
-  CoUninitialize();
-
-  printf("Pasta descompactada!\n");
-  return 0;
-}
 
 int main() {
   SetConsoleOutputCP(CP_UTF8);
@@ -134,8 +31,13 @@ int main() {
   IDirect3D9 *d3d = Direct3DCreate9(D3D_SDK_VERSION);
   if (d3d) {
     D3DADAPTER_IDENTIFIER9 adapterIdentifier;
+    for (int i = 0; i < d3d->GetAdapterCount(); i++) {
+      D3DADAPTER_IDENTIFIER9 adapterIdentifierLoop;
+      std::cout << adapterIdentifierLoop.Description << " | " << adapterIdentifierLoop.DeviceName << std::endl;
+    }
+    
     if (SUCCEEDED(d3d->GetAdapterIdentifier(D3DADAPTER_DEFAULT, 0, &adapterIdentifier))) {
-      if (adapterIdentifier.VendorId == 0x10DE) {
+      if (adapterIdentifier.VendorId == 0x10DE) { // AMD: 4098
         if (GlobalMemoryStatusEx(&memInfo)) {
           int memory = std::round(memInfo.ullTotalPhys / (1024.0f * 1024.0f * 1024.0f));
           if (memory <= 8) {
@@ -200,7 +102,7 @@ int main() {
                         int percent = static_cast<int>(((double)totalRead * 100.0) / fileSize);
                         if (ifPercent != percent) {
                           ifPercent = percent;
-                          printProgressBar(ifPercent);
+                          progressBar(ifPercent);
                         }
                       } else {
                         printf("\r%c (%.2f MB)", spinner[spinner_idx], (double)totalRead / (1024 * 1024));
