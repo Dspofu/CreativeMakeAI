@@ -54,13 +54,21 @@ cfg = ctk.CTkSlider(master=main_frame, from_=0.5, to=30, command=lambda value: c
 cfg.set(4.5)
 cfg.pack(anchor="w", padx=0, pady=(0, 20), fill="both")
 
-seed_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
-seed_frame.pack(anchor="w", padx=0, pady=(0, 20))
+# Container do Seed e Escala
+container_seed_scale = ctk.CTkFrame(main_frame, fg_color="transparent")
+container_seed_scale.pack(anchor="w", padx=0, pady=(0, 20))
 
-ctk.CTkLabel(seed_frame, text="Seed:", font=("Arial", 14)).pack(side="left", padx=(0,10))
-seed_entry = ctk.CTkEntry(seed_frame, width=150, font=("Arial", 14), fg_color=COR_INPUT, text_color=COR_TEXTO, border_width=0, corner_radius=8)
+# Seed
+ctk.CTkLabel(container_seed_scale, text="Seed:", font=("Arial", 14)).pack(side="left", padx=(0,10))
+seed_entry = ctk.CTkEntry(container_seed_scale, width=150, font=("Arial", 14), fg_color=COR_INPUT, text_color=COR_TEXTO, border_width=0, corner_radius=8)
 seed_entry.pack(side="left")
 seed_entry.insert(0, "-1")
+
+# Resoluções
+ctk.CTkLabel(container_seed_scale, text="Escala da imagem:", font=("Arial", 14)).pack(side="left", padx=(45, 5))
+scale_listbox = ctk.CTkComboBox(container_seed_scale, values=["512x512", "1024x1024", "1920x1080", "2048x2048"], width=100, command=lambda lora_name: list_lora(lora_name, lora_label, lora_scale), state="readonly")
+scale_listbox.set("1024x1024")
+scale_listbox.pack(side="left", pady=0, fill="both")
 
 # Container LoRA's
 container_lora = ctk.CTkFrame(main_frame, fg_color=COR_FRAME)
