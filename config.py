@@ -28,8 +28,8 @@ ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
 window = ctk.CTk()
+window.geometry(f"500x700+{int((window.winfo_screenwidth() / 2) - (500 / 2))}+{int((window.winfo_screenheight() / 2) - (700 / 2))}")
 window.title("v1.0.0@BETA - CreativeMakeAI")
-window.geometry("500x700")
 window.resizable(False, False)
 window.configure(fg_color=COR_FRAME)
 try:

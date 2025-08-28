@@ -6,8 +6,8 @@ from src.modules.popup import*
 
 # Função para ativar ou desativar o limitador por temperatura
 def active_temp_alert():
-  global limit_temp
-  limit_temp = not limit_temp
+  config.limit_temp
+  config.limit_temp = not config.limit_temp
 
 # Selecionar modelo
 model_button = ctk.CTkButton(window, text="Selecionar modelo", command=lambda: select_model(model_button, generate_button, lora_listbox, model_lora, loaded_loras, lora_label, lora_scale), font=("Arial", 12))
@@ -22,7 +22,7 @@ ctk.CTkLabel(window, text="Alerta de temperatura:", font=("Arial", 14)).pack(anc
 
 # Checkbox de temperatura
 checkBox = ctk.CTkCheckBox(window, text="", command=active_temp_alert, fg_color=COR_BOTAO, hover_color=COR_BOTAO_HOVER, checkbox_width=20, checkbox_height=20, corner_radius=5, bg_color=COR_FRAME)
-checkBox.select(limit_temp)
+checkBox.select(config.limit_temp)
 checkBox.place(relx=1.12, rely=0.0, y=10, x=0, anchor="ne")
 
 # Container inputs
@@ -111,7 +111,7 @@ remove_lora_button = ctk.CTkButton(lora_list_frame, text="Remover", command=lamb
 remove_lora_button.pack(side="left", pady=(0, 10), fill="both")
 
 # Botão Gerar Imagem
-generate_button = ctk.CTkButton(main_frame, text="Gerar Imagem", command=lambda: viwerImage(generate_button, temperature_label, prompt_entry, negative_prompt_entry, steps, cfg, seed_entry, lora_listbox), state="disabled", font=("Arial", 14, "bold"), fg_color=COR_BOTAO_IMAGE, hover_color=COR_BOTAO_IMAGE_HOVER, height=40, corner_radius=8)
+generate_button = ctk.CTkButton(main_frame, text="Gerar Imagem", command=lambda: viwerImage(generate_button, temperature_label, scale_listbox.get(), prompt_entry, negative_prompt_entry, steps, cfg, seed_entry, lora_listbox), state="disabled", font=("Arial", 14, "bold"), fg_color=COR_BOTAO_IMAGE, hover_color=COR_BOTAO_IMAGE_HOVER, height=40, corner_radius=8)
 generate_button.pack(padx=20, pady=20, fill="x")
 
 window.mainloop()

@@ -3,13 +3,19 @@ from src.modules.saveImage import save_image
 
 # Função de clique para gerar imagem
 def new_image_window(image):
+  img_width, img_height = image.size
+  scale = min(512 / img_width, 512 / img_height)
+  new_width = int(img_width * scale)
+  new_height = int(img_height * scale)
+  resized_image = image.resize((new_width, new_height), config.Image.LANCZOS)
+
   image_window = config.ctk.CTkToplevel(config.window)
   image_window.title("Imagem Gerada")
-  image_window.geometry("1024x1024")
+  image_window.geometry(f"{512}x{512}")
   image_window.resizable(False, False)
   image_window.configure(fg_color=config.COR_FRAME)
   # Imagem exibida
-  ctk_image = config.ctk.CTkImage(light_image=image, dark_image=image, size=(1024, 1024))
+  ctk_image = config.ctk.CTkImage(light_image=image, dark_image=image, size=(new_height, new_height))
   image_label = config.ctk.CTkLabel(image_window, image=ctk_image, text="")
   image_label.place(x=0, y=0)
   # Botão de salvar
@@ -17,7 +23,7 @@ def new_image_window(image):
   salvar_btn.pack(padx=10, pady=10)
 
 # Função para gerar a imagem
-def viwerImage(generate_button, temperature_label, prompt_entry, negative_prompt_entry, steps, cfg, seed_entry, lora_listbox):
+def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entry, negative_prompt_entry, steps, cfg, seed_entry, lora_listbox):
   def worker():
     # Checagens de segurança
     if config.setPipe is None:
@@ -29,6 +35,21 @@ def viwerImage(generate_button, temperature_label, prompt_entry, negative_prompt
       config.error("Prompt não identificado.")
       print("Prompt não identificado.")
       return 1
+    if not any(x in scale_image for x in ["512x512", "1024x1024", "1920x1080", "2048x2048"]):
+      config.error("Escala para imagem incorreta.")
+      print("Escala para imagem incorreta.")
+      return 1
+    width=1024
+    height=1024
+    if scale_image == "512x512":
+      width=512
+      height=512
+    elif scale_image == "1920x1080":
+      width=1920
+      height=1080
+    elif scale_image == "2048x2048":
+      width=2048
+      height=2048
     generate_button.configure(state="disabled", text="Configurando ambiente")
     selected_lora_name = lora_listbox.get()
     lora_to_apply = config.loaded_loras.get(selected_lora_name)
@@ -48,7 +69,7 @@ def viwerImage(generate_button, temperature_label, prompt_entry, negative_prompt
         seed_value = int(seed_entry.get())
       except (ValueError, TypeError):
         seed_value = -1
-      result = generate_click(generate_button, temperature_label, config.setTorch, config.setPipe, config.limit_temp, prompt_entry.get("1.0", "end-1c"), negative_prompt_entry.get("1.0", "end-1c") or config.negative_prompt, int(steps.get()), round(cfg.get(), 1), lora_strength, seed=seed_value)
+      result = generate_click(generate_button, temperature_label, width, height, config.setTorch, config.setPipe, config.limit_temp, prompt_entry.get("1.0", "end-1c"), negative_prompt_entry.get("1.0", "end-1c") or config.negative_prompt, int(steps.get()), round(cfg.get(), 1), lora_strength, seed=seed_value)
       if result[0] == 1: return
       image, used_seed = result
       # seed_entry.delete(0, "end")

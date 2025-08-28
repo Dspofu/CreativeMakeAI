@@ -1,11 +1,12 @@
 import random
 from tkinter import Image, Button
+from diffusers import StableDiffusionXLPipeline
 
 def hash_tensor(tensor):
   import hashlib
   return hashlib.sha256(tensor.cpu().numpy().tobytes()).hexdigest()
 
-def generate_click(generate_button: Button, temperature_label, torch, pipe, limit_temp: bool, prompt: str, negative_prompt: str, steps: int, cfg: float, lora_scale, seed) -> Image | int:
+def generate_click(generate_button: Button, temperature_label, width, height, torch, pipe: StableDiffusionXLPipeline, limit_temp: bool, prompt: str, negative_prompt: str, steps: int, cfg: float, lora_scale, seed) -> Image | int:
   import psutil
   import os
   from src.modules.coldGPU import safe_temp, reset_alert
@@ -26,22 +27,24 @@ def generate_click(generate_button: Button, temperature_label, torch, pipe, limi
 
     generator = torch.Generator(device="cuda").manual_seed(seed)
     image = pipe(
+      width=width,
+      height=height,
       prompt=prompt,
       negative_prompt=negative_prompt,
       num_inference_steps=steps,
       guidance_scale=cfg,
       cross_attention_kwargs={"scale": lora_scale},
       callback_on_step_end=listen_steps,
-      generator=generator,
+      generator=generator
     ).images[0]
 
     used_seed = generator.initial_seed()
     return image, used_seed
   except Exception as e:
     print(f"Ocorreu um erro: {e}")
-    temperature_label.configure(text="--°C")
+    temperature_label.configure(text="--°C", text_color="#D9D9D9")
     return 1, -1
   finally:
     reset_alert()
     print(f"Imagem gerada | Seed: {used_seed}")
-    temperature_label.configure(text="--°C")
+    temperature_label.configure(text="--°C", text_color="#D9D9D9")
