@@ -5,8 +5,7 @@ import time
 critical_temp = False
 
 def reset_alert():
-  global critical_temp
-  critical_temp = False
+  global critical_temp; critical_temp = False
 
 def safe_temp(pipe, temp_label, gpu: int = 0):
   global critical_temp

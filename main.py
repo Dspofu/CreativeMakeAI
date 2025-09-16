@@ -4,6 +4,8 @@ from src.functions.lora import list_lora, select_lora, unload_lora
 from src.functions.model import select_model
 from src.modules.popup import*
 
+qtdImg = 1
+
 # Função para ativar ou desativar o limitador por temperatura
 def active_temp_alert():
   config.limit_temp
@@ -110,8 +112,45 @@ lora_listbox.pack(side="left", padx=(0, 10), pady=(0, 10))
 remove_lora_button = ctk.CTkButton(lora_list_frame, text="Remover", command=lambda: unload_lora(lora_listbox, lora_label, lora_scale))
 remove_lora_button.pack(side="left", pady=(0, 10), fill="both")
 
+# Container do botão de gerar
+frame_generate = ctk.CTkFrame(main_frame, fg_color=COR_FRAME)
+frame_generate.pack(anchor="w")
+
+# Crie a função para a ação de "stop" (substitua 'pass' pela sua lógica de interrupção)
+def stop_generation():
+  config.stop_img = True
+
+# Botão Stop
+ctk.CTkButton(frame_generate, text="■", command=stop_generation, font=("Arial", 28, "bold"), fg_color="red", hover_color="#C90000", height=40, width=40, corner_radius=8).pack(side="left", padx=(0, 5))
+
 # Botão Gerar Imagem
-generate_button = ctk.CTkButton(main_frame, text="Gerar Imagem", command=lambda: viwerImage(generate_button, temperature_label, scale_listbox.get(), prompt_entry, negative_prompt_entry, steps, cfg, seed_entry, lora_listbox), state="disabled", font=("Arial", 14, "bold"), fg_color=COR_BOTAO_IMAGE, hover_color=COR_BOTAO_IMAGE_HOVER, height=40, corner_radius=8)
-generate_button.pack(padx=20, pady=20, fill="x")
+generate_button = ctk.CTkButton(frame_generate, text="Gerar Imagem", command=lambda: viwerImage(generate_button, temperature_label, scale_listbox.get(), prompt_entry, negative_prompt_entry, steps, cfg, seed_entry, lora_listbox, qtdImg=qtdImg), state="disabled", font=("Arial", 14, "bold"), fg_color=COR_BOTAO_IMAGE, hover_color=COR_BOTAO_IMAGE_HOVER, height=40, width=350, corner_radius=8)
+generate_button.pack(side="left", padx=(0,5))
+
+qtdImage_label = ctk.CTkLabel(frame_generate, text="1", height=40, width=40, fg_color=COR_INPUT, corner_radius=8)
+qtdImage_label.pack(side="left", padx=0)
+
+# Container de setas para quantidade de imagem
+frame_arrows = ctk.CTkFrame(frame_generate, fg_color=COR_FRAME)
+frame_arrows.pack(anchor="w", side="left", padx=0)
+
+# Quantidade de imagens para serem geradas
+def plusImage():
+  global qtdImg
+  if qtdImg >= 50: return
+  qtdImg+=1
+  qtdImage_label.configure(text=qtdImg)
+
+upQtd = ctk.CTkButton(frame_arrows, text="\u25B2", height=20, width=30, cursor="hand2", fg_color=COR_FRAME, corner_radius=5, command=lambda: plusImage())
+upQtd.pack(padx=0)
+
+def lessImage():
+  global qtdImg
+  if qtdImg == 1: return
+  qtdImg-=1
+  qtdImage_label.configure(text=qtdImg)
+
+downQtd = ctk.CTkButton(frame_arrows, text="\u25BC", height=20, width=30, cursor="hand2", fg_color=COR_FRAME, corner_radius=5, command=lambda: lessImage())
+downQtd.pack(padx=0)
 
 window.mainloop()

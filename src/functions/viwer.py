@@ -23,7 +23,8 @@ def new_image_window(image):
   salvar_btn.pack(padx=10, pady=10)
 
 # Função para gerar a imagem
-def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entry, negative_prompt_entry, steps, cfg, seed_entry, lora_listbox):
+def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entry: str, negative_prompt_entry: str, steps: int, cfg: float, seed_entry: int, lora_listbox, qtdImg: int):
+  config.stop_img = False
   def worker():
     # Checagens de segurança
     if config.setPipe is None:
@@ -69,13 +70,15 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
         seed_value = int(seed_entry.get())
       except (ValueError, TypeError):
         seed_value = -1
-      result = generate_click(generate_button, temperature_label, width, height, config.setTorch, config.setPipe, config.limit_temp, prompt_entry.get("1.0", "end-1c"), negative_prompt_entry.get("1.0", "end-1c") or config.negative_prompt, int(steps.get()), round(cfg.get(), 1), lora_strength, seed=seed_value)
-      if result[0] == 1: return
-      image, used_seed = result
-      # seed_entry.delete(0, "end")
-      # seed_entry.insert(0, str(used_seed))
-      config.window.after(0, lambda: new_image_window(image))
+      for i in range(qtdImg):
+        result = generate_click(generate_button, temperature_label, width, height, config.setTorch, config.setPipe, config.limit_temp, prompt_entry.get("1.0", "end-1c"), negative_prompt_entry.get("1.0", "end-1c") or config.negative_prompt, int(steps.get()), round(cfg.get(), 1), lora_strength, seed=seed_value, fila=qtdImg, positionFila=i)
+        if result[0] == 1: return
+        image, used_seed = result
+        # seed_entry.delete(0, "end")
+        # seed_entry.insert(0, str(used_seed))
+        config.window.after(0, lambda: new_image_window(image))
     except Exception as e:
+      if config.stop_img: return
       config.error(f"Ocorreu um erro na geração:\n{e}")
       print(f"Erro em viwerImage: {e}")
     finally:
