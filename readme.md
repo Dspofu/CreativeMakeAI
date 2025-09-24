@@ -1,5 +1,5 @@
 ## Documentação/Guia Oficiais
-[Pagina guia e documentação em construção](https://pofuserver.com/creativeMakeAI)
+[Pagina de guia e documentação em construção](https://pofuserver.com/creativeMakeAI)
 
 ## Instalação
 
@@ -16,11 +16,15 @@ Comando para build do `.cpp`
 g++ -static main.cpp -o installer_start.exe -lole32 -loleaut32 -luuid -lshell32 -lshlwapi -lwininet -static-libgcc -static-libstdc++ -ld3d9
 ```
 
-Comando para build do `.py`
+Comando para build do `.py` usando `cx_Freeze` ou `pyinstaller`
 
+**cx_Freeze**
 ```batch
 python build.py build -v
+```
 
+**pyinstaller**
+```batch
 pyinstaller --name "CreativeMakeAI" --windowed --onefile --icon="assets/images/icon_24px.ico" --add-data="assets;assets" --collect-all="transformers" --collect-all="diffusers" main.py
 ```
 
@@ -63,7 +67,10 @@ ___
 - GPU Nvidia: `RTX 2060 super` • OBS: `RTX 3050 8GB > GTX 1080 TI 11GB`
 - RAM: (2x16) 32GB - 3200MHz
 
-> Dica: em uma placa de video os modelos de IA tem um bom desempenho naquelas que possuem um alto numero de `tensor cores`, `Vram` e uma boa `arquitetura`, eu diria que se você é uma amante dessa área, que você use então modelos `RTX` que possuem no `mínimo 12GB de vram` para voce poder fugir para modelos ainda maiores que `15GB`
+> Dica: Em uma placa de video os modelos de IA tem um bom desempenho naquelas que possuem um alto numero de `tensor cores`, `Vram` e uma boa `arquitetura`, eu diria que se você é uma amante dessa área, que você use então modelos `RTX` que possuem no `mínimo 12GB de vram` para desfrutar de modelos mais complexos que `15GB`
+
+> [!NOTE]  
+> Impostante notar que geralmente o software consume em média (~9GB) de Ram em modelos médios de 6GB
 
 # 
 
