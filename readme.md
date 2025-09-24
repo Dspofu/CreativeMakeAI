@@ -3,7 +3,7 @@
 
 ## Instalação
 
-[Clique aqui](https://github.com/Dspofu/CreativeMakeAI/releases/download/0.1.0/CreativeMakeAI-Beta.zip) para baixar o projeto
+[Clique aqui](https://drive.google.com/drive/folders/1xVklTGqESl3ZXmRYNTfFzR9J8oaOTZWB?usp=sharing) para baixar o projeto
 
 - O programa é seguro, mas não possui um certificado indexado, por isso o seu OS pode detecta-lo como possivel ameaça.
 
