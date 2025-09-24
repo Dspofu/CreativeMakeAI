@@ -19,7 +19,7 @@
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "shell32.lib")
 #pragma comment(lib, "ole32.lib")
-#pragma comment(lib, "shlwapi.lib")
+#pragma comment(lib, "shlwapi.lib") 
 
 int main() {
   SetConsoleOutputCP(CP_UTF8);

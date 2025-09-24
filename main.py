@@ -1,8 +1,20 @@
+import os
+import sys
 from config import*
 from src.functions.viwer import viwerImage
 from src.functions.lora import list_lora, select_lora, unload_lora
 from src.functions.model import select_model
 from src.modules.popup import*
+
+if sys.platform != "win32":
+  config.alert("Este projeto foi idealizado somente para Windows 10+ até então.\nNão garanto compatibilidade a outros sistemas por enquanto.")
+
+is_frozen = getattr(sys, 'frozen', False)
+
+if is_frozen:
+  log_file = os.path.join(os.path.dirname(sys.executable), "log.txt")
+  sys.stdout = open(log_file, "w", encoding="utf-8")
+  sys.stderr = sys.stdout
 
 qtdImg = 1
 

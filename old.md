@@ -1,11 +1,17 @@
 ## Documentação/Guia Oficiais
-[Pagina guia e documentação em construção](https://pofuserver.com/creativeMakeAI)
+[Pagina em construção](https://pofuserver.com/creativeMakeAI)
 
 ## Instalação
 
-[Clique aqui](https://github.com/Dspofu/CreativeMakeAI/releases/download/0.1.0/CreativeMakeAI-Beta.zip) para baixar o projeto
+Clone o repositório ou [clique aqui](https://github.com/Dspofu/CreativeMakeAI/releases/download/1.0.0/installer_start.exe) para baixar o instalador
 
-- O programa é seguro, mas não possui um certificado indexado, por isso o seu OS pode detecta-lo como possivel ameaça.
+- O programa de instalação é seguro, mas não possui um certificado indexado, por isso o seu OS pode detecta-lo como possivel ameaça.
+
+Na instalação é só fazer oque for mais correspondentes as opções, na segunda etapa você deve escolher a ultima opção para baixar os arquivos do programa caso não tenha baixado do github via `.zip`.
+
+```batch
+git clone https://github.com/Dspofu/CreativeMakeAI.git
+```
 
 <details>
   <summary><h3><strong>Dev Build Commands</strong> 👈</h3></summary>
@@ -19,14 +25,13 @@ g++ -static main.cpp -o installer_start.exe -lole32 -loleaut32 -luuid -lshell32 
 Comando para build do `.py`
 
 ```batch
-python build.py build -v
-
-pyinstaller --name "CreativeMakeAI" --windowed --onefile --icon="assets/images/icon_24px.ico" --add-data="assets;assets" --collect-all="transformers" --collect-all="diffusers" main.py
+pyinstaller --onefile --windowed --icon="assets/images/icon.ico" main.py
+pyinstaller main.spec
 ```
 
 </details>
 
-Para uma breve verificação simples execute o arquivo `varificar.exe`.<br>
+Para instalar e fazer uma breve verificação execute o arquivo `nvidia-gpu-5.0plus.bat`.<br>
 A aplicação só vai funcionar caso possua uma placa de video `GPU - Nvidia` que tenha a *capacidade computacional* superior a `5.0`, por um requisito da versão do **cuda toolkit**.<br>
 Caso queria saber a capacidade computacional de sua placa de video você pode consultar no [site da Nvidia](https://developer.nvidia.com/cuda-gpus).
 
@@ -34,21 +39,30 @@ ___
 
 ## Após ter tudo baixado é só iniciar
 
-##### Exemplo de versões anteriores
 <image src="assets/images/example.gif">
 
 - Sistema de `Alerta de temperatura` funciona como um recurso de espera, conforme esquenta ela espera para gerar a próxima etapa.
-- Os modelos LoRA's devem ser selecionados para alterar o estilo para o qual deseja.
-- O recorso de `gerar varias imagens` vai fazer com que a GPU trabalhe por mais tempo, recomendo deixar o `Alerta de Temperatura` ativo.
-- O `log.txt` vai conter registros de andamentos e erros, lá você pode encontrar tambem a `seed` das imagens que estão sendo geradas.
+- Os modelos LoRA's devem ser selecionados para alterar a sua escala.
 
 <image src="assets/images/example.png" style="width: 350px">
 
 ___
 
+#### Baixar os pacotes da aplicação. 
+
+Seria ideal ler antes as [**recomendações**](#recomendações)
+
+```batch
+pip install -r requirements.txt
+```
+
+- Instalação rápida com a verificação simples é só executar o arquivo: `nvidia-gpu-5.0plus.bat`
+- O instalador ainda não é compativel com distribiuções `Linux`
+___
+
 ## Baixar modelos
 
-Para baixar o modelo de IA para gerar imagem existem varios sites, [Hugging Face](https://huggingface.co/models?pipeline_tag=text-to-image&library=safetensors&sort=trending) ou [CivitAi](https://civitai.com/models) é um desses sites, para o CivitAi eu recomendo que filtre por:
+Para baixar o modelo de IA para gerar imagem existem varios sites, [CivitAi](https://civitai.com/models) é um desses sites, nele eu recomendo que filtre por:
 
 |Model status: `Checkpoint` | Checkpoint type: `All` | File fomart: `SafeTensor`
 |---|---|---|
@@ -58,12 +72,20 @@ OBS: Geralmente os modelos tem de 3GB a 15GB, então não se assuste com o taman
 
 ___
 
-## Recomendações Minimas
+## Recomendações
 
+- Python: `3.13.1`
+- pip: `25.1.1`
 - GPU Nvidia: `RTX 2060 super` • OBS: `RTX 3050 8GB > GTX 1080 TI 11GB`
 - RAM: (2x16) 32GB - 3200MHz
 
 > Dica: em uma placa de video os modelos de IA tem um bom desempenho naquelas que possuem um alto numero de `tensor cores`, `Vram` e uma boa `arquitetura`, eu diria que se você é uma amante dessa área, que você use então modelos `RTX` que possuem no `mínimo 12GB de vram` para voce poder fugir para modelos ainda maiores que `15GB`
+
+### Python
+|Recurso|Versão|Compatibilidade|
+|:---:|:---:|:---|
+|Python|3.12.0|🟢 - Bibliotecas compativeis|
+|Pip|24.3.1|🟢 - Funciona tranquilamente|
 
 # 
 
@@ -87,6 +109,34 @@ ___
 |RAM|HyperX/'others'|32GB 3200MHz|
 |GPU|Nvidia|RTX 2060 Super 8GB|
 |SSD|Kingspec/SanDisk/'others'|240GB 5000Mb/s|
+
+# 
+
+#### Gerar o `venv` local para ficar armazenado as libs da aplicação.
+
+```batch
+python -m venv venv
+```
+
+#### Duas formas no terminal do `Windows` para acessar o `venv`
+
+**Powershell**
+
+```batch
+.\venv\Scripts\Activate.ps1
+```
+
+**Cmd**
+
+```batch
+.\venv\Scripts\activate.bat
+```
+
+#### Verificar atualização do seu gerenciador de pacotes `pip`
+
+```batch
+.\venv\Scripts\python.exe -m pip install --upgrade pip
+```
 
 # 
 
