@@ -70,7 +70,7 @@ ___
 > Dica: Em uma placa de video os modelos de IA tem um bom desempenho naquelas que possuem um alto numero de `tensor cores`, `Vram` e uma boa `arquitetura`, eu diria que se você é uma amante dessa área, que você use então modelos `RTX` que possuem no `mínimo 12GB de vram` para desfrutar de modelos mais complexos que `15GB`
 
 > [!NOTE]  
-> Impostante notar que geralmente o software consume em média (~9GB) de Ram em modelos médios de 6GB
+> Importante notar que geralmente o software consume em média (~9GB) de Ram em modelos médios de 6GB
 
 # 
 
