@@ -30,7 +30,7 @@ pyinstaller --name "CreativeMakeAI" --windowed --onefile --icon="assets/images/i
 
 </details>
 
-Para uma breve verificação simples execute o arquivo `varificar.exe`.<br>
+Para uma breve verificação simples execute o arquivo `verificar.exe`.<br>
 A aplicação só vai funcionar caso possua uma placa de video `GPU - Nvidia` que tenha a *capacidade computacional* superior a `5.0`, por um requisito da versão do **cuda toolkit**.<br>
 Caso queria saber a capacidade computacional de sua placa de video você pode consultar no [site da Nvidia](https://developer.nvidia.com/cuda-gpus).
 
