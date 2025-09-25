@@ -18,10 +18,11 @@ def select_model(model_button, generate_button, lora_listbox, model_lora, loaded
     model_button.configure(state="disabled", text="Preparando ambiente")
     print("Iniciando pacotes.")
     import torch
+    model_button.configure(text="Configurando pesos")
     from diffusers import StableDiffusionXLPipeline
     config.setTorch = torch
     print("Carregando modelo.")
-    model_button.configure(state="disabled", text="Carregando modelo")
+    model_button.configure(text="Carregando modelo")
     try:
       config.setPipe = StableDiffusionXLPipeline.from_single_file(model_path, torch_dtype=torch.float16, variant="fp16")
       print("Aplicando as otimizações.")

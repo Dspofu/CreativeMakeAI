@@ -32,8 +32,7 @@ build_options = {
   "includes": ["diffusers.pipelines.stable_diffusion_xl"],
   "include_files": include_files_list,
   "optimize": 2,
-  # "excludes": ["tkinter"],
-  "build_exe": "build/dist",
+  # "excludes": ["tkinter"]
 }
 
 # Configuração do executável
@@ -62,13 +61,9 @@ setup(
       "upgrade_code": "{9a9046de-651a-41ff-9411-4ab34f2b9800}",
       "add_to_path": False,
       "initial_target_dir": r"[ProgramFilesFolder]\CreativeMakeAI",
-      "summary_data": {
-        "author": "Gabriel P. Góes",
-        "comments": "©2025 Gabriel P. Góes. Todos os direitos reservados.",
-        "description": "Beta - Ferramenta avançada para geração de imagens criativa com IA",
-        "keywords": "IA, Diffusion, Creative, Generator",
-        "title": "CreativeMakeAI Beta",
-      },
+      "license_file": "LICENSE.rtf",
+      # "bitmap": "assets/images/installer_background.bmp",
+      # "banner_bitmap": "assets/images/installer_banner.bmp"
     }
   }
 )

@@ -4,6 +4,8 @@ __pycache__
 *.jpg
 *.jpeg
 *.zip
+*.db
 venv
 build
+dist
 !assets/*/*.*
