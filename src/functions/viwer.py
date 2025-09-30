@@ -77,7 +77,6 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
         seed_value = int(seed_entry.get())
         progress(100)
       except (ValueError, TypeError):
-        config.window.title(config.winTitle)
         seed_value = -1
       for i in range(qtdImg):
         result = generate_click(generate_button, temperature_label, width, height, config.setTorch, config.setPipe, config.limit_temp, prompt_entry.get("1.0", "end-1c"), negative_prompt_entry.get("1.0", "end-1c") or config.negative_prompt, int(steps.get()), round(cfg.get(), 1), lora_strength, seed=seed_value, fila=qtdImg, positionFila=i)
@@ -88,7 +87,6 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
         # seed_entry.insert(0, str(used_seed))
         config.window.after(0, lambda: new_image_window(image, seed=used_seed))
     except Exception as e:
-      config.window.title(config.winTitle)
       if config.stop_img:
         progress(100)
         print("\nTrabalho interrompido")

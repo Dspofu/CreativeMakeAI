@@ -9,7 +9,6 @@ def hash_tensor(tensor):
   return hashlib.sha256(tensor.cpu().numpy().tobytes()).hexdigest()
 
 def generate_click(generate_button: Button, temperature_label, width: int, height: int, torch, pipe: StableDiffusionXLPipeline, limit_temp: bool, prompt: str, negative_prompt: str, steps: int, cfg: float, lora_scale: float, seed: int, fila: int, positionFila: int) -> Image | int:
-  config.window.title(f"{config.winTitle} | Gerando imagem")
   config.window.configure(cursor="watch")
   import psutil
   import os
@@ -31,6 +30,7 @@ def generate_click(generate_button: Button, temperature_label, width: int, heigh
     else:
       print(f"Usando a seed: {seed}")
 
+    config.window.title(f"{config.winTitle} | Gerando imagem")
     generator = torch.Generator(device="cuda").manual_seed(seed)
     image = pipe(
       width=width,
