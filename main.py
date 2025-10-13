@@ -36,7 +36,7 @@ ctk.CTkLabel(window, text="Alerta de temperatura:", font=("Arial", 14)).place(re
 
 # Checkbox de temperatura
 checkBox = ctk.CTkCheckBox(window, text="", command=active_temp_alert, fg_color=COR_BOTAO, hover_color=COR_BOTAO_HOVER, checkbox_width=20, checkbox_height=20, corner_radius=5, bg_color=COR_FRAME)
-checkBox.select(config.limit_temp)
+checkBox.select(config.limit_temp) 
 checkBox.place(relx=1.12, rely=0.0, y=30, x=0, anchor="ne")
 
 # Container inputs

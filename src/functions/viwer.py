@@ -1,9 +1,11 @@
+import hashlib
+import os
 import config
 from src.modules.loading import progress
-from src.modules.saveImage import save_image
+from src.modules.save_image import save_image
 
 # Função de clique para gerar imagem
-def new_image_window(image, seed: int):
+def new_image_window(image, meta: dict[str, any]):
   img_width, img_height = image.size
   scale = min(512 / img_width, 512 / img_height)
   new_width = int(img_width * scale)
@@ -11,7 +13,7 @@ def new_image_window(image, seed: int):
   resized_image = image.resize((new_width, new_height), config.Image.LANCZOS)
 
   image_window = config.ctk.CTkToplevel(config.window)
-  image_window.title(f"Imagem Gerada | Seed: {seed}")
+  image_window.title(f"Imagem Gerada | Seed: {meta["Seed"]}")
   image_window.geometry(f"{512}x{512}")
   image_window.resizable(False, False)
   image_window.configure(fg_color=config.COR_FRAME)
@@ -20,7 +22,7 @@ def new_image_window(image, seed: int):
   image_label = config.ctk.CTkLabel(image_window, image=ctk_image, text="")
   image_label.place(x=0, y=0)
   # Botão de salvar
-  salvar_btn = config.ctk.CTkButton(image_window, text="Salvar", command=lambda: save_image(image), fg_color=config.COR_BOTAO, hover_color=config.COR_BOTAO_HOVER)
+  salvar_btn = config.ctk.CTkButton(image_window, text="Salvar", command=lambda: save_image(image, meta), fg_color=config.COR_BOTAO, hover_color=config.COR_BOTAO_HOVER)
   salvar_btn.pack(padx=10, pady=10)
 
 # Função para gerar a imagem
@@ -72,20 +74,49 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
       progress(66)
       config.window.title(f"{config.winTitle} | Alocando na RAM")
       generate_button.configure(text="Carregando modelo na memória")
-      from src.modules.createImage import generate_click
+      from src.modules.generate_click import generate_click
       try:
         seed_value = int(seed_entry.get())
         progress(100)
       except (ValueError, TypeError):
         seed_value = -1
       for i in range(qtdImg):
-        result = generate_click(generate_button, temperature_label, width, height, config.setTorch, config.setPipe, config.limit_temp, prompt_entry.get("1.0", "end-1c"), negative_prompt_entry.get("1.0", "end-1c") or config.negative_prompt, int(steps.get()), round(cfg.get(), 1), lora_strength, seed=seed_value, fila=qtdImg, positionFila=i)
+        prompt_text = prompt_entry.get("1.0", "end-1c")
+        negative_prompt_text = negative_prompt_entry.get("1.0", "end-1c") or config.negative_prompt
+        steps_value = int(steps.get())
+        cfg_value = round(cfg.get(), 1)
+
+        result = generate_click(generate_button, temperature_label, width, height, config.setTorch, config.setPipe, config.limit_temp, prompt_text, negative_prompt_text, steps_value, cfg_value, lora_strength, seed=seed_value, fila=qtdImg, positionFila=i)
+        
         if result[0] == 1: return
         config.window.title(f"{config.winTitle} | Renderizando imagem")
         image, used_seed = result
-        # seed_entry.delete(0, "end")
-        # seed_entry.insert(0, str(used_seed))
-        config.window.after(0, lambda: new_image_window(image, seed=used_seed))
+
+        model_path = getattr(config.setPipe, "model_path", None)
+        if model_path:
+          model_name = os.path.splitext(os.path.basename(model_path))[0]
+          with open(model_path, "rb") as f:
+            model_hash = hashlib.sha256(f.read()).hexdigest()[:12]
+        else:
+          model_name = "Desconhecido"
+          model_hash = "Desconhecido"
+
+        # Metadados da imagem
+        metadata = {
+          "Prompt": prompt_text,
+          "Negative Prompt": negative_prompt_text,
+          "Steps": steps_value,
+          "Sampler:": None,
+          "CFG Scale": cfg_value,
+          "Seed": used_seed,
+          "Size": f"{width}x{height}",
+          "Model hash:": model_hash,
+          "Model:": model_name,
+          "Lora": lora_listbox.get(),
+          "Lora Scale": lora_strength,
+          "Generator": "CreativeMakeAI"
+        }
+        config.window.after(0, lambda img=image, meta=metadata: new_image_window(img, meta))
     except Exception as e:
       if config.stop_img:
         progress(100)

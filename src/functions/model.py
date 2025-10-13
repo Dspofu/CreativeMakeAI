@@ -1,3 +1,4 @@
+import safetensors.torch
 import config
 import time
 from tkinter import filedialog
@@ -12,6 +13,9 @@ def select_model(model_button, generate_button, lora_listbox, model_lora, loaded
       filetypes=[("Modelos .safetensors", "*.safetensors")]
     )
     if not model_path: return
+    print("Procurando metadados")
+    meta = safetensors.torch.safe_open(model_path, framework="pt", device="cpu").metadata()
+    if meta: print(f"Metadados encontrados do modelo:\n{meta}")
     lora_listbox.set("")
     loaded_loras.clear()
     lora_listbox.configure(values=[])
@@ -19,11 +23,11 @@ def select_model(model_button, generate_button, lora_listbox, model_lora, loaded
     lora_scale.set(0.75)
     progress(0)
     print("Iniciando pacotes.")
-    config.window.title(f"{config.winTitle} | Carregando pacotes 1/2")
+    config.window.title(f"{config.winTitle} | Carregando 1/2")
     model_button.configure(state="disabled", text="Preparando ambiente")
     import torch
     progress(30)
-    config.window.title(f"{config.winTitle} | Carregando pacotes 2/2")
+    config.window.title(f"{config.winTitle} | Carregando 2/2")
     model_button.configure(text="Preparando ajustes")
     from diffusers import StableDiffusionXLPipeline
     progress(50)
@@ -54,7 +58,7 @@ def select_model(model_button, generate_button, lora_listbox, model_lora, loaded
       model_button.configure(text="Modelo carregado")
     except Exception as e:
       print(e)
-      config.alert("Algo falhou, verifique o modelo e compatibilidade do CUDA e versão dos drivers.")
+      config.alert("Algo falhou, verifique o modelo e usa compatibilidade de CUDA ou versão dos drivers.")
       model_button.configure(state="normal", text="Falha no carregamento")
       generate_button.configure(state="disabled")
       model_lora.configure(state="disabled")

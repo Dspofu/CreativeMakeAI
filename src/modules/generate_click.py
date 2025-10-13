@@ -12,9 +12,10 @@ def generate_click(generate_button: Button, temperature_label, width: int, heigh
   config.window.configure(cursor="watch")
   import psutil
   import os
-  from src.modules.coldGPU import safe_temp, reset_alert
+  from src.modules.safe_temp import safe_temp, reset_alert
 
   def listen_steps(pipe_instance, step_index, timestep, callback_kwargs) -> dict:
+    config.window.title(f"{config.winTitle} | Gerando imagem")
     print(f"Timestep: {timestep} | VRAM: {torch.cuda.memory_allocated() / 1024**3:.2f}GB | RAM: {psutil.Process(os.getpid()).memory_info().rss / 1024**3:.2f}GB | Steps: {step_index+1}/{steps}   ", end=("\r" if step_index < steps - 1 else '\n'), flush=True)
     progress(int(((step_index+1)*100)/steps))
     generate_button.configure(text=f"Progresso: {step_index+1}/{steps} | Fila: {positionFila+1}/{fila}")
@@ -30,7 +31,7 @@ def generate_click(generate_button: Button, temperature_label, width: int, heigh
     else:
       print(f"Usando a seed: {seed}")
 
-    config.window.title(f"{config.winTitle} | Gerando imagem")
+    config.window.title(f"{config.winTitle} | Configurando parâmetros")
     generator = torch.Generator(device="cuda").manual_seed(seed)
     image = pipe(
       width=width,
@@ -49,7 +50,6 @@ def generate_click(generate_button: Button, temperature_label, width: int, heigh
   except Exception as e:
     if config.stop_img: return 1, -1
     print(f"Ocorreu um erro: {e}")
-    temperature_label.configure(text="--°C", text_color="#D9D9D9")
     return 1, -1
   finally:
     reset_alert()
