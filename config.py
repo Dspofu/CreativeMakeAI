@@ -8,8 +8,10 @@ from PIL import Image, ImageTk
 from src.modules.popup import*
 
 winTitle = "CreativeMakeAI v0.1.0@BETA"
+github = "https://github.com/Dspofu/CreativeMakeAI"
 
 # Configurações para o modelo
+model_path = None
 setTorch = None
 setPipe = None
 limit_temp = True

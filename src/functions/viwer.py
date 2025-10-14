@@ -92,29 +92,38 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
         config.window.title(f"{config.winTitle} | Renderizando imagem")
         image, used_seed = result
 
-        model_path = getattr(config.setPipe, "model_path", None)
-        if model_path:
+        model_path = getattr(config, "model_path", None)
+        print(f"model_path: {model_path}")
+
+        if model_path and os.path.exists(model_path):
           model_name = os.path.splitext(os.path.basename(model_path))[0]
-          with open(model_path, "rb") as f:
-            model_hash = hashlib.sha256(f.read()).hexdigest()[:12]
+          print(f"Nome do modelo: {model_name}")
+          try:
+            with open(model_path, "rb") as f:
+              model_hash = hashlib.sha256(f.read()).hexdigest()[:12]
+          except Exception as e:
+            print(f"Falha ao calcular hash: {e}")
+            model_hash = "ErroHash"
         else:
-          model_name = "Desconhecido"
-          model_hash = "Desconhecido"
+          print("Caminho não encontrado, usando padrão.")
+          model_name = None
+          model_hash = None
 
         # Metadados da imagem
         metadata = {
           "Prompt": prompt_text,
           "Negative Prompt": negative_prompt_text,
           "Steps": steps_value,
-          "Sampler:": None,
+          "Sampler": None,
           "CFG Scale": cfg_value,
           "Seed": used_seed,
           "Size": f"{width}x{height}",
-          "Model hash:": model_hash,
-          "Model:": model_name,
-          "Lora": lora_listbox.get(),
+          "Model hash": model_hash,
+          "Model": model_name,
+          "Lora": lora_listbox.get() or None,
           "Lora Scale": lora_strength,
-          "Generator": "CreativeMakeAI"
+          "Generator": "CreativeMakeAI",
+          "GitHub": config.github,
         }
         config.window.after(0, lambda img=image, meta=metadata: new_image_window(img, meta))
     except Exception as e:

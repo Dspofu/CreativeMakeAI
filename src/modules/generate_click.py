@@ -52,6 +52,7 @@ def generate_click(generate_button: Button, temperature_label, width: int, heigh
     print(f"Ocorreu um erro: {e}")
     return 1, -1
   finally:
-    reset_alert()
-    print(f"Imagem gerada | Seed: {used_seed}")
+    # reset_alert()
+    if 'used_seed' in locals(): print(f"Imagem gerada | Seed: {used_seed}")
+    else: print("Falha, seed não gerada corretamente.")
     temperature_label.configure(text="--°C", text_color="#D9D9D9")

@@ -14,10 +14,10 @@ def save_image(image, metadata: dict = None):
 
     # SD_Prompt Leitura de metadados
     compatible = (
-      f"Prompt: {metadata.get('Prompt', '')}\n"
+      f"{metadata.get('Prompt', '')}\n"
       f"Negative prompt: {metadata.get('Negative Prompt', '')}\n"
       f"Steps: {metadata.get('Steps', '')}, "
-      f"Sampler: {metadata.get('Sampler:', '')}, "
+      f"Sampler: {metadata.get('Sampler', '')}, "
       f"CFG scale: {metadata.get('CFG Scale', '')}, "
       f"Seed: {metadata.get('Seed', '')}, "
       f"Size: {metadata.get('Size', '')}, "
@@ -25,8 +25,11 @@ def save_image(image, metadata: dict = None):
       f"Model: {metadata.get('Model', '')}, "
       f"Lora: {metadata.get('Lora', '')}, "
       f"Lora Scale: {metadata.get('Lora Scale', '')}, "
-      "Generator: CreativeMakeAI"
+      f"Generator: {metadata.get('Generator', '')}, "
+      f"Software GitHub: {metadata.get('GitHub', '')}"
     )
+
+    print(metadata.get('Model', ''))
 
     png_info.add_text("parameters", compatible)
     png_info.add_text("Software", "CreativeMakeAI")

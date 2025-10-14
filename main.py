@@ -5,6 +5,7 @@ from src.functions.viwer import viwerImage
 from src.functions.lora import list_lora, select_lora, unload_lora
 from src.functions.model import select_model
 from src.modules.popup import*
+import pynvml
 
 if sys.platform != "win32":
   config.alert("Este projeto foi idealizado somente para Windows 10+ até então.\nNão garanto compatibilidade a outros sistemas por enquanto.")
@@ -32,12 +33,16 @@ temperature_label = ctk.CTkLabel(window, text="--°C", font=("Arial", 12), bg_co
 temperature_label.place(relx=1.0, rely=0.0, y=28, x=-45, anchor="ne")
 
 # Alerta de temperatura
-ctk.CTkLabel(window, text="Alerta de temperatura:", font=("Arial", 14)).place(relx=0.56, y=28)
+ctk.CTkLabel(window, text="Alerta de temperatura", font=("Arial", 14)).place(relx=0.56, y=20)
+pynvml.nvmlInit()
+handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+gpu_name = pynvml.nvmlDeviceGetName(handle)
+ctk.CTkLabel(window, text=gpu_name, font=("Arial", 10), text_color="#E2FF3F").place(relx=0.56, y=40)
 
 # Checkbox de temperatura
 checkBox = ctk.CTkCheckBox(window, text="", command=active_temp_alert, fg_color=COR_BOTAO, hover_color=COR_BOTAO_HOVER, checkbox_width=20, checkbox_height=20, corner_radius=5, bg_color=COR_FRAME)
 checkBox.select(config.limit_temp) 
-checkBox.place(relx=1.12, rely=0.0, y=30, x=0, anchor="ne")
+checkBox.place(relx=1.12, y=30, x=0, anchor="ne")
 
 # Container inputs
 main_frame = ctk.CTkFrame(window, fg_color=COR_FRAME)
