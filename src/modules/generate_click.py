@@ -48,11 +48,12 @@ def generate_click(generate_button: Button, temperature_label, width: int, heigh
     used_seed = generator.initial_seed()
     return image, used_seed
   except Exception as e:
-    if config.stop_img: return 1, -1
+    if config.stop_img:
+      print("Processo interrompido.")
+      return 1, -1
     print(f"Ocorreu um erro: {e}")
     return 1, -1
   finally:
     # reset_alert()
-    if 'used_seed' in locals(): print(f"Imagem gerada | Seed: {used_seed}")
-    else: print("Falha, seed não gerada corretamente.")
+    if not 'used_seed' in locals(): print("Falha, seed não gerada corretamente.")
     temperature_label.configure(text="--°C", text_color="#D9D9D9")

@@ -40,6 +40,7 @@ def select_model(model_button, generate_button, lora_listbox, model_lora, loaded
       config.setPipe = StableDiffusionXLPipeline.from_single_file(model_path, torch_dtype=torch.float16, variant="fp16")
       config.model_path = model_path
       setattr(config.setPipe, "model_path", model_path)
+      print(f"Diretório do modelo: {model_path}")
       print("Aplicando as otimizações.")
       model_button.configure(text="Otimizando modelo")
       progress(80)

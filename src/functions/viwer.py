@@ -89,15 +89,13 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
         result = generate_click(generate_button, temperature_label, width, height, config.setTorch, config.setPipe, config.limit_temp, prompt_text, negative_prompt_text, steps_value, cfg_value, lora_strength, seed=seed_value, fila=qtdImg, positionFila=i)
         
         if result[0] == 1: return
-        config.window.title(f"{config.winTitle} | Renderizando imagem")
         image, used_seed = result
+        config.window.title(f"{config.winTitle} | Renderizando imagem")
+        print(f"Renderizando imagem.")
 
         model_path = getattr(config, "model_path", None)
-        print(f"model_path: {model_path}")
-
         if model_path and os.path.exists(model_path):
           model_name = os.path.splitext(os.path.basename(model_path))[0]
-          print(f"Nome do modelo: {model_name}")
           try:
             with open(model_path, "rb") as f:
               model_hash = hashlib.sha256(f.read()).hexdigest()[:12]
@@ -125,6 +123,7 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
           "Generator": "CreativeMakeAI",
           "GitHub": config.github,
         }
+        print("Imagem renderizada.")
         config.window.after(0, lambda img=image, meta=metadata: new_image_window(img, meta))
     except Exception as e:
       if config.stop_img:
