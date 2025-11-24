@@ -27,7 +27,7 @@ python build.py build -v
 
 **pyinstaller**
 ```batch
-pyinstaller --name "CreativeMakeAI" --windowed --onefile --icon="assets/images/icon_24px.ico" --add-data="assets;assets" --collect-all="transformers" --collect-all="diffusers" main.py
+pyinstaller --noconfirm --onedir --windowed --name "CreativeMakeAI" --icon "assets/images/icon_24px.ico" --add-data "assets;assets" --add-data "src;src" --collect-all "customtkinter" --collect-all "transformers" --collect-all "diffusers" --hidden-import "PIL" --hidden-import "pynvml" --hidden-import "accelerate" main.py
 ```
 
 </details>

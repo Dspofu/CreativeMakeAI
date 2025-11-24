@@ -1,10 +1,11 @@
 import hashlib
 import os
 import config
+import time
 from src.modules.loading import progress
 from src.modules.save_image import save_image
 
-# Função de clique para gerar imagem
+# Gerar imagem
 def new_image_window(image, meta: dict[str, any]):
   img_width, img_height = image.size
   scale = min(512 / img_width, 512 / img_height)
@@ -13,14 +14,16 @@ def new_image_window(image, meta: dict[str, any]):
   resized_image = image.resize((new_width, new_height), config.Image.LANCZOS)
 
   image_window = config.ctk.CTkToplevel(config.window)
-  image_window.title(f"Imagem Gerada | Seed: {meta["Seed"]}")
+  image_window.title(f"Imagem Gerada | Seed: {meta['Seed']}")
   image_window.geometry(f"{512}x{512}")
   image_window.resizable(False, False)
   image_window.configure(fg_color=config.COR_FRAME)
+
   # Imagem exibida
   ctk_image = config.ctk.CTkImage(light_image=image, dark_image=image, size=(new_height, new_height))
   image_label = config.ctk.CTkLabel(image_window, image=ctk_image, text="")
   image_label.place(x=0, y=0)
+
   # Botão de salvar
   salvar_btn = config.ctk.CTkButton(image_window, text="Salvar", command=lambda: save_image(image, meta), fg_color=config.COR_BOTAO, hover_color=config.COR_BOTAO_HOVER)
   salvar_btn.pack(padx=10, pady=10)
@@ -80,12 +83,15 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
         progress(100)
       except (ValueError, TypeError):
         seed_value = -1
+      
+      # Loop de geração de imagens
       for i in range(qtdImg):
         prompt_text = prompt_entry.get("1.0", "end-1c")
         negative_prompt_text = negative_prompt_entry.get("1.0", "end-1c") or config.negative_prompt
         steps_value = int(steps.get())
         cfg_value = round(cfg.get(), 1)
-
+        start_time = time.time()
+        
         result = generate_click(generate_button, temperature_label, width, height, config.setTorch, config.setPipe, config.limit_temp, prompt_text, negative_prompt_text, steps_value, cfg_value, lora_strength, seed=seed_value, fila=qtdImg, positionFila=i)
         
         if result[0] == 1: return
@@ -108,6 +114,7 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
           model_hash = None
 
         # Metadados da imagem
+        elapsed_time = time.time() - start_time
         metadata = {
           "Prompt": prompt_text,
           "Negative Prompt": negative_prompt_text,
@@ -122,8 +129,9 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
           "Lora Scale": lora_strength,
           "Generator": "CreativeMakeAI",
           "GitHub": config.github,
+          "Generation Time": f"{elapsed_time:.2f}s"
         }
-        print("Imagem renderizada.")
+        print(f"Imagem renderizada, tempo de duração: \"{elapsed_time:.2f}s\"\n")
         config.window.after(0, lambda img=image, meta=metadata: new_image_window(img, meta))
     except Exception as e:
       if config.stop_img:
