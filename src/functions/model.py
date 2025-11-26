@@ -1,10 +1,10 @@
-import safetensors.torch
 import config
 import time
 import gc 
+import torch
 from tkinter import filedialog
 from src.modules.loading import progress
-from diffusers import StableDiffusionXLPipeline, DPMSolverMultistepScheduler 
+from diffusers import StableDiffusionXLPipeline, EulerAncestralDiscreteScheduler
 
 def select_model(model_button, generate_button, lora_listbox, model_lora, loaded_loras, lora_label, lora_scale):
   def worker():
@@ -14,98 +14,107 @@ def select_model(model_button, generate_button, lora_listbox, model_lora, loaded
     )
     if not model_path: return
 
-    # Limpeza da memória
+    # Limpeza do Pipe/memória
     if config.setPipe is not None:
       del config.setPipe
       config.setPipe = None
-      gc.collect()
-      if config.setTorch and config.setTorch.cuda.is_available():
-        config.setTorch.cuda.empty_cache()
+    gc.collect()
+    if torch.cuda.is_available():
+      torch.cuda.empty_cache()
+      torch.cuda.ipc_collect()
 
-    print("Procurando metadados")
-    meta = safetensors.torch.safe_open(model_path, framework="pt", device="cpu").metadata()
-    if meta: print(f"Metadados encontrados:\n{meta}")
-    
     lora_listbox.set("")
     loaded_loras.clear()
     lora_listbox.configure(values=[])
-    lora_label.configure(text="LoRA Scale: 0.75")
-    lora_scale.set(0.75)
     
-    progress(0)
+    progress(10)
     config.window.title(f"{config.winTitle} | Carregando...")
-    model_button.configure(state="disabled", text="Preparando ambiente")
+    model_button.configure(state="disabled", text="Analisando Hardware...")
     
-    import torch
     config.setTorch = torch
     
-    # Otimização de Kernel (Velocidade Pura)
+    # Detecção de Hardware
+    vram_total = 0
+    gpu_name = "CPU"
     if torch.cuda.is_available():
+      # Otimizações para NVIDIA
       torch.backends.cudnn.benchmark = True 
-
+      torch.backends.cuda.matmul.allow_tf32 = True
+      vram_total = torch.cuda.get_device_properties(0).total_memory / 1024**3
+      gpu_name = torch.cuda.get_device_name(0)
+    
+    print(f"Hardware detectado: {gpu_name} | VRAM: {vram_total:.1f}GB")
     progress(30)
-    model_button.configure(text="Lendo Safetensors")
-    progress(50)
     
     try:
-      config.window.title(f"{config.winTitle} | Inicializando Pipeline")
+      # Se tiver pouca VRAM (<6GB) usa FP16. Se for CPU usa float32.
+      dtype_load = torch.float16 if torch.cuda.is_available() else torch.float32
       
       pipe = StableDiffusionXLPipeline.from_single_file(
         model_path, 
-        torch_dtype=torch.float16, 
+        torch_dtype=dtype_load, 
         variant="fp16", 
         use_safetensors=True
       )
 
-      # Scheduler DPM++ 2M Karras (Rápido)
-      pipe.scheduler = DPMSolverMultistepScheduler.from_config(
-        pipe.scheduler.config, 
-        use_karras_sigmas=True,
-        algorithm_type="dpmsolver++"
-      )
+      # Scheduler Euler para velocidade
+      pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
       
       config.model_path = model_path
       setattr(pipe, "model_path", model_path)
       config.setPipe = pipe
 
-      print(f"Diretório do modelo: {model_path}")
-      model_button.configure(text="Aplicando Perfil")
-      progress(80)
-      print(f"Aplicando o perfil: \"{config.profile}\"")
+      model_button.configure(text="Otimizando Pipeline...")
+      progress(60)      
+      optimization_method = "Nenhum"
       
-      if config.profile == "High Performance":
-        # Muita VRAM não precisa de Tiling.
-        config.setPipe.to("cuda")
-        config.setPipe.disable_vae_slicing()
-        config.setPipe.disable_vae_tiling()
+      # Xformers (Melhor para GTX 1000/RTX 2000/3000)
+      try:
+        pipe.enable_xformers_memory_efficient_attention()
+        optimization_method = "Xformers"
+      except Exception:
+        try:
+          optimization_method = "PyTorch 2 SDPA (Nativo)"
+        except:
+          pass
+      # Se for Perfil "Low Memory" e não conseguiu Xformers, ativa Slicing.
+      if config.profile == "Low Memory" and optimization_method == "Nenhum":
+        pipe.enable_attention_slicing()
+        optimization_method = "Attention Slicing (Lento/Seguro)"
 
-      elif config.profile == "Balanced":
-        config.setPipe.enable_model_cpu_offload()
-        config.setPipe.enable_vae_slicing() # Slicing por segurança
-        config.setPipe.disable_vae_tiling() # Sem Tiling para velocidade
+      print(f"Método de aceleração ativo: {optimization_method}")
 
-      else: # Low Memory
-        config.setPipe.enable_sequential_cpu_offload()
-        config.setPipe.enable_vae_slicing()
-        config.setPipe.enable_vae_tiling()
-
-      progress(98)
-      config.setPipe.set_progress_bar_config(disable=True)
-      model_button.configure(text="Modelo carregado")
+      # VAE otimizado
+      if hasattr(pipe, "vae"):
+        pipe.vae.to(dtype=torch.float16)
+        if config.profile == "Low Memory":
+          pipe.enable_vae_tiling()
+          pipe.enable_vae_slicing()
+          pipe.enable_model_cpu_offload()
+        elif config.profile == "Balanced":
+          pipe.disable_vae_tiling()
+          pipe.enable_vae_slicing()
+          pipe.enable_model_cpu_offload()
+        else: # High Performance
+          pipe.disable_vae_tiling()
+          pipe.disable_vae_slicing()
+          pipe.to("cuda")
+      progress(100)
+      model_button.configure(text="Modelo Carregado")
+      print(f"Perfil: {config.profile} | Aceleração: {optimization_method}")
       
     except Exception as e:
-      print(e)
-      config.alert("Algo falhou. Tente o perfil 'Low Memory' se estiver travando.")
-      model_button.configure(state="normal", text="Falha no carregamento")
+      print(f"Erro Fatal: {e}")
+      config.alert(f"Erro ao carregar modelo:\n{e}\nTente o perfil 'Low Memory'.")
+      model_button.configure(state="normal", text="Erro")
       generate_button.configure(state="disabled")
-      model_lora.configure(state="disabled")
+      return
+
     finally:
-      time.sleep(1.5)
+      time.sleep(1)
       config.window.title(config.winTitle)
       generate_button.configure(state="normal")
       model_lora.configure(state="normal")
       model_button.configure(state="normal", text="Selecionar modelo")
-      progress(100)
-      print("Pronto.")
   
   config.threading.Thread(target=worker, daemon=True).start()

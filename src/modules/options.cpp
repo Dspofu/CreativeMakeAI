@@ -22,8 +22,8 @@ void loopOption(D3DADAPTER_IDENTIFIER9 adapterIdentifier, int memory) {
 void option2() {
   system("python -m venv venv");
   system(".\\venv\\Scripts\\python.exe -m pip install --upgrade pip");
-  system(".\\venv\\Scripts\\python.exe -m pip install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128");
   system(".\\venv\\Scripts\\python.exe -m pip install -r requirements.txt");
+  system(".\\venv\\Scripts\\python.exe -m pip install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128");
   system(".\\venv\\Scripts\\python.exe -m pip list");
   printf("\nInicialize o venv para testar.\n");
 }

@@ -5,34 +5,40 @@ import time
 from src.modules.loading import progress
 from src.modules.save_image import save_image
 
+time_label = None
+
 # Gerar imagem
 def new_image_window(image, meta: dict[str, any]):
   img_width, img_height = image.size
+  
   scale = min(512 / img_width, 512 / img_height)
   new_width = int(img_width * scale)
   new_height = int(img_height * scale)
-  resized_image = image.resize((new_width, new_height), config.Image.LANCZOS)
+  
+  image_preview = image.resize((new_width, new_height), config.Image.BILINEAR)
 
   image_window = config.ctk.CTkToplevel(config.window)
-  image_window.title(f"Imagem Gerada | Seed: {meta['Seed']}")
-  image_window.geometry(f"{512}x{512}")
+  image_window.title(f"Resultado | Seed: {meta['Seed']}")
+  image_window.geometry(f"{new_width}x{new_height}")
   image_window.resizable(False, False)
-  image_window.configure(fg_color=config.COR_FRAME)
+  image_window.configure(fg_color="black")
 
-  # Imagem exibida
-  ctk_image = config.ctk.CTkImage(light_image=image, dark_image=image, size=(new_height, new_height))
+  ctk_image = config.ctk.CTkImage(light_image=image_preview, dark_image=image_preview, size=(new_width, new_height))
   image_label = config.ctk.CTkLabel(image_window, image=ctk_image, text="")
   image_label.place(x=0, y=0)
 
-  # Botão de salvar
-  salvar_btn = config.ctk.CTkButton(image_window, text="Salvar", command=lambda: save_image(image, meta), fg_color=config.COR_BOTAO, hover_color=config.COR_BOTAO_HOVER)
-  salvar_btn.pack(padx=10, pady=10)
+  salvar_btn = config.ctk.CTkButton(image_window, text="Salvar Imagem", command=lambda: save_image(image, meta), fg_color=config.COR_BOTAO, hover_color=config.COR_BOTAO_HOVER, bg_color="transparent", height=32, font=("Arial", 12, "bold"))
+  salvar_btn.place(relx=0.5, rely=0.95, anchor="s")
+
+  tempo_texto = meta.get("Generation Time", "--")
+  
+  time_label = config.ctk.CTkLabel(image_window, text=f"Tempo: {tempo_texto}", font=("Segoe UI", 12, "bold"), text_color="white", fg_color="#000000", corner_radius=6, padx=8, pady=4, bg_color="transparent")
+  time_label.place(relx=0.97, rely=0.03, anchor="ne")
 
 # Função para gerar a imagem
 def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entry: str, negative_prompt_entry: str, steps: int, cfg: float, seed_entry: int, lora_listbox, qtdImg: int):
   config.stop_img = False
   def worker():
-    # Checagens de segurança
     if config.setPipe is None:
       config.error("Erro: pipe não foi definido.")
       print("Erro: pipe não foi definido.")
@@ -131,7 +137,8 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
           "GitHub": config.github,
           "Generation Time": f"{elapsed_time:.2f}s"
         }
-        print(f"Imagem renderizada, tempo de duração: \"{elapsed_time:.2f}s\"\n")
+        # time_label.configure(text=f"Tempo: {elapsed_time:.2f}s")
+        print(f"Imagem renderizada, tempo de duração: \"{elapsed_time:.2f}s\"")
         config.window.after(0, lambda img=image, meta=metadata: new_image_window(img, meta))
     except Exception as e:
       if config.stop_img:

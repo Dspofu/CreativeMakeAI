@@ -4,9 +4,9 @@ import torch
 
 # Explicações de perfil
 PERFIL_INFO = {
-    "High Performance": "MODO: Tudo na Placa de Vídeo (VRAM Resident)\nO modelo fica armazenado dentro da memória da placa de vídeo (VRAM). Não perde tempo para movendo arquivos.\n\n✅ VANTAGENS: A geração começa instantaneamente, usa todo recurso possivel para geração.\n❌ DESVANTAGENS: Se a sua placa não tiver memória suficiente (20GB+), o programa pode se encerrar (Crash).",
-    "Balanced": "MODO: Gerenciamento Inteligente (CPU Offload)\nÉ feito uma divisão na partes do modelo para memória RAM do PC e só envia para a placa de vídeo o que for usar no momento.\n\n✅ VANTAGENS: Permite rodar modelos pesados em placas médias (8GB a 16GB).\n❌ DESVANTAGENS: Pequena pausa entre as etapas para mover dados.",
-    "Low Memory": "MODO: Passo-a-Passo (Sequential Offload)\nCarrega o modelo 'fatia por fatia'. Ele processa um pedaço da imagem, limpa a memória, e carrega o próximo.\n\n✅ VANTAGENS: Roda o SDXL até em placas antigas ou básicas (4GB a 6GB) sem travar seu PC.\n❌ DESVANTAGENS: A geração demora bem mais, pois o trabalho é feito em fila."
+  "High Performance": "MODO: Tudo na Placa de Vídeo (VRAM Resident)\nO modelo fica armazenado dentro da memória da placa de vídeo (VRAM). Não perde tempo para movendo arquivos.\n\n✅ VANTAGENS: A geração começa instantaneamente, usa todo recurso possivel para geração.\n❌ DESVANTAGENS: Se a sua placa não tiver memória suficiente (20GB+) o programa pode fechar (Crash).",
+  "Balanced": "MODO: Gerenciamento Inteligente (CPU Offload)\nÉ feito uma divisão na partes do modelo para memória RAM do PC e só envia para a placa de vídeo o que for usar no momento.\n\n✅ VANTAGENS: Permite rodar modelos pesados em placas médias (8GB a 16GB).\n❌ DESVANTAGENS: Pequena pausa entre as etapas para mover dados.",
+  "Low Memory": "MODO: Passo-a-Passo (Sequential Offload)\nCarrega o modelo 'fatia por fatia'. Ele processa um pedaço da imagem, limpa a memória, e carrega o próximo.\n\n✅ VANTAGENS: Roda o SDXL até em placas antigas ou básicas (4GB a 6GB) sem travar seu PC.\n❌ DESVANTAGENS: A geração demora bem mais, pois o trabalho é feito em fila."
 }
 
 list_perfil = list(PERFIL_INFO.keys())
