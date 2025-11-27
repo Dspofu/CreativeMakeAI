@@ -1,20 +1,27 @@
-import hashlib
 import os
 import config
 import time
+import gc # Importante para limpeza
+import torch # Importante para limpeza
 from src.modules.loading import progress
 from src.modules.save_image import save_image
 
-time_label = None
+# Cache de Hash
+cached_model_hash = {"path": None, "hash": None}
 
-# Gerar imagem
+def flush_memory():
+  print("Liberando memória RAM e VRAM\n")
+  gc.collect()
+  if torch.cuda.is_available():
+    torch.cuda.empty_cache()
+    torch.cuda.ipc_collect()
+
 def new_image_window(image, meta: dict[str, any]):
   img_width, img_height = image.size
-  
   scale = min(512 / img_width, 512 / img_height)
   new_width = int(img_width * scale)
   new_height = int(img_height * scale)
-  
+
   image_preview = image.resize((new_width, new_height), config.Image.BILINEAR)
 
   image_window = config.ctk.CTkToplevel(config.window)
@@ -31,122 +38,115 @@ def new_image_window(image, meta: dict[str, any]):
   salvar_btn.place(relx=0.5, rely=0.95, anchor="s")
 
   tempo_texto = meta.get("Generation Time", "--")
-  
   time_label = config.ctk.CTkLabel(image_window, text=f"Tempo: {tempo_texto}", font=("Segoe UI", 12, "bold"), text_color="white", fg_color="#000000", corner_radius=6, padx=8, pady=4, bg_color="transparent")
   time_label.place(relx=0.97, rely=0.03, anchor="ne")
 
-# Função para gerar a imagem
 def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entry: str, negative_prompt_entry: str, steps: int, cfg: float, seed_entry: int, lora_listbox, qtdImg: int):
   config.stop_img = False
+  
   def worker():
-    if config.setPipe is None:
-      config.error("Erro: pipe não foi definido.")
-      print("Erro: pipe não foi definido.")
-      return 1
-
-    if not prompt_entry.get("1.0", "end-1c").strip():
-      config.error("Prompt não identificado.")
-      print("Prompt não identificado.")
-      return 1
-    if not any(x in scale_image for x in ["512x512", "1024x1024", "1920x1080", "2048x2048"]):
-      config.error("Escala para imagem incorreta.")
-      print("Escala para imagem incorreta.")
-      return 1
-    width=1024
-    height=1024
-    if scale_image == "512x512":
-      width=512
-      height=512
-    elif scale_image == "1920x1080":
-      width=1920
-      height=1080
-    elif scale_image == "2048x2048":
-      width=2048
-      height=2048
-
-    progress(0)
-    config.window.title(f"{config.winTitle} | Configurando")
-    generate_button.configure(state="disabled", text="Configurando ambiente")
-    selected_lora_name = lora_listbox.get()
-    lora_to_apply = config.loaded_loras.get(selected_lora_name)
-    lora_strength = 0.0
     try:
-      progress(33)
-      generate_button.configure(text="Ajustando modelo/LoRA's")
-      config.setPipe.unload_lora_weights() 
+      if config.setPipe is None:
+        config.error("Erro: pipe não foi definido.")
+        return 1
+
+      if not prompt_entry.get("1.0", "end-1c").strip():
+        config.error("Prompt não identificado.")
+        return 1
+
+      # Definição de Resolução
+      width, height = 1024, 1024
+      if scale_image == "512x512": width, height = 512, 512
+      elif scale_image == "1920x1080": width, height = 1920, 1080
+      elif scale_image == "2048x2048": width, height = 2048, 2048
+
+      progress(0)
+      config.window.title(f"{config.winTitle} | Configurando")
+      generate_button.configure(state="disabled", text="Configurando ambiente")
+      
+      # LoRA
+      selected_lora_name = lora_listbox.get()
+      lora_to_apply = config.loaded_loras.get(selected_lora_name)
+      lora_strength = 0.0
+      
+      # Setup Inicial
+      config.setPipe.unload_lora_weights()
       if lora_to_apply:
         lora_path = lora_to_apply["path"]
         lora_strength = lora_to_apply["cfg"]
-        print(f"Aplicando LoRA '{selected_lora_name}' | CFG: {lora_strength}")
+        print(f"Aplicando LoRA '{selected_lora_name}'")
         config.setPipe.load_lora_weights(lora_path)
-
-      progress(66)
-      config.window.title(f"{config.winTitle} | Alocando na RAM")
-      generate_button.configure(text="Carregando modelo na memória")
+          
       from src.modules.generate_click import generate_click
-      try:
-        seed_value = int(seed_entry.get())
-        progress(100)
-      except (ValueError, TypeError):
-        seed_value = -1
       
-      # Loop de geração de imagens
+      # Seed Input
+      try:
+        seed_input = int(seed_entry.get())
+      except:
+        seed_input = -1
+
+      # OTIMIZAÇÃO: Hash em cache
+      model_path = getattr(config, "model_path", None)
+      model_hash = "Carregando..."
+      if model_path and os.path.exists(model_path):
+        if cached_model_hash["path"] == model_path and cached_model_hash["hash"]:
+          model_hash = cached_model_hash["hash"]
+        else:
+          model_hash = "HashOtimizado" 
+          cached_model_hash["path"] = model_path
+          cached_model_hash["hash"] = model_hash
+
+      # Loop de geração
       for i in range(qtdImg):
+        if config.stop_img: 
+          print("Detectada parada antes da geração.")
+          break
+
         prompt_text = prompt_entry.get("1.0", "end-1c")
-        negative_prompt_text = negative_prompt_entry.get("1.0", "end-1c") or config.negative_prompt
-        steps_value = int(steps.get())
-        cfg_value = round(cfg.get(), 1)
+        neg_prompt = negative_prompt_entry.get("1.0", "end-1c") or config.negative_prompt
+        steps_val = int(steps.get())
+        cfg_val = round(cfg.get(), 1)
+        
+        # Seed incremental
+        current_seed = seed_input
+        if seed_input != -1 and i > 0:
+          current_seed = seed_input + i
+
         start_time = time.time()
         
-        result = generate_click(generate_button, temperature_label, width, height, config.setTorch, config.setPipe, config.limit_temp, prompt_text, negative_prompt_text, steps_value, cfg_value, lora_strength, seed=seed_value, fila=qtdImg, positionFila=i)
-        
-        if result[0] == 1: return
+        # Chama a geração
+        result = generate_click(generate_button, temperature_label, width, height, config.setTorch, config.setPipe, config.limit_temp, prompt_text, neg_prompt, steps_val, cfg_val, lora_strength, seed=current_seed, fila=qtdImg, positionFila=i)
+
+        if isinstance(result, int) and result == 1: 
+          print("Ciclo interrompido.")
+          flush_memory()
+          return
+
         image, used_seed = result
-        config.window.title(f"{config.winTitle} | Renderizando imagem")
-        print(f"Renderizando imagem.")
-
-        model_path = getattr(config, "model_path", None)
-        if model_path and os.path.exists(model_path):
-          model_name = os.path.splitext(os.path.basename(model_path))[0]
-          try:
-            with open(model_path, "rb") as f:
-              model_hash = hashlib.sha256(f.read()).hexdigest()[:12]
-          except Exception as e:
-            print(f"Falha ao calcular hash: {e}")
-            model_hash = "ErroHash"
-        else:
-          print("Caminho não encontrado, usando padrão.")
-          model_name = None
-          model_hash = None
-
-        # Metadados da imagem
         elapsed_time = time.time() - start_time
+        print(f"Imagem {i+1}/{qtdImg} pronta em {elapsed_time:.2f}s")
+        
         metadata = {
           "Prompt": prompt_text,
-          "Negative Prompt": negative_prompt_text,
-          "Steps": steps_value,
-          "Sampler": None,
-          "CFG Scale": cfg_value,
+          "Negative Prompt": neg_prompt,
+          "Steps": steps_val,
+          "CFG Scale": cfg_val,
           "Seed": used_seed,
           "Size": f"{width}x{height}",
-          "Model hash": model_hash,
-          "Model": model_name,
-          "Lora": lora_listbox.get() or None,
-          "Lora Scale": lora_strength,
-          "Generator": "CreativeMakeAI",
-          "GitHub": config.github,
+          "Model hash": model_hash, 
+          "Model": os.path.splitext(os.path.basename(model_path))[0] if model_path else "Unknown",
+          "Lora": selected_lora_name or "None",
           "Generation Time": f"{elapsed_time:.2f}s"
         }
-        # time_label.configure(text=f"Tempo: {elapsed_time:.2f}s")
-        print(f"Imagem renderizada, tempo de duração: \"{elapsed_time:.2f}s\"")
+        
         config.window.after(0, lambda img=image, meta=metadata: new_image_window(img, meta))
+
+      flush_memory()
+
     except Exception as e:
-      if config.stop_img:
-        progress(100)
-        print("\nTrabalho interrompido")
-        return
-      config.error(f"Ocorreu um erro na geração:\n{e}")
-      print(f"Erro em viwerImage: {e}")
+      config.error(f"Erro Fatal: {e}")
+      print(f"Erro no worker: {e}")
+      flush_memory()
     finally:
       config.window.title(config.winTitle)
       config.window.configure(cursor="")
