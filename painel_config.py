@@ -21,7 +21,7 @@ def abrir_painel(parent):
     y = int((screen_height / 2) - (height / 2))
     
     windowConfig.geometry(f"{width}x{height}+{x}+{y}")
-    windowConfig.title(f"{winTitle} - Configuração de Pipeline")
+    windowConfig.title(f"{winTitle} - Configuração de Perfil")
     windowConfig.resizable(False, False)
     windowConfig.configure(fg_color=COR_FRAME)
     

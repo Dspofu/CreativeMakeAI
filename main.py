@@ -33,6 +33,9 @@ except Exception:
 model_button = ctk.CTkButton(window, text="Selecionar modelo", command=lambda: select_model(model_button, generate_button, lora_listbox, model_lora, loaded_loras, lora_label, lora_scale), font=("Arial", 12))
 model_button.place(x=10, y=30)
 
+bt_limpar = ctk.CTkButton(window, text="Limpar VRAM", command=lambda: config.flush_memory(), width=100, font=("Arial", 12), fg_color="#E07A00", hover_color="#B86400")
+bt_limpar.place(x=160, y=30)
+
 # Temperatura
 temperature_label = ctk.CTkLabel(window, text="--°C", font=("Arial", 12), bg_color=COR_FRAME, text_color="white")
 temperature_label.place(relx=1.0, rely=0.0, y=28, x=-45, anchor="ne")

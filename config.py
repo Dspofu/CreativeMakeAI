@@ -10,6 +10,7 @@ import tkinter as tk
 import customtkinter as ctk
 import threading
 from PIL import Image, ImageTk
+from src.modules.flush_memory import*
 from src.modules.popup import*
 
 # Verificação de OS
@@ -28,7 +29,6 @@ github = "https://github.com/Dspofu/CreativeMakeAI"
 
 # Variáveis Globais
 model_path = None
-setTorch = None
 setPipe = None
 profile = "Balanced" 
 limit_temp = True

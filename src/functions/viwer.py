@@ -1,20 +1,13 @@
 import os
+import torch
 import config
 import time
-import gc # Importante para limpeza
-import torch # Importante para limpeza
+from src.modules.flush_memory import*
 from src.modules.loading import progress
 from src.modules.save_image import save_image
 
 # Cache de Hash
 cached_model_hash = {"path": None, "hash": None}
-
-def flush_memory():
-  print("Liberando memória RAM e VRAM\n")
-  gc.collect()
-  if torch.cuda.is_available():
-    torch.cuda.empty_cache()
-    torch.cuda.ipc_collect()
 
 def new_image_window(image, meta: dict[str, any]):
   img_width, img_height = image.size
@@ -43,7 +36,7 @@ def new_image_window(image, meta: dict[str, any]):
 
 def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entry: str, negative_prompt_entry: str, steps: int, cfg: float, seed_entry: int, lora_listbox, qtdImg: int):
   config.stop_img = False
-  
+
   def worker():
     try:
       if config.setPipe is None:
@@ -61,44 +54,34 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
       elif scale_image == "2048x2048": width, height = 2048, 2048
 
       progress(0)
-      config.window.title(f"{config.winTitle} | Configurando")
       generate_button.configure(state="disabled", text="Configurando ambiente")
-      
+
       # LoRA
       selected_lora_name = lora_listbox.get()
       lora_to_apply = config.loaded_loras.get(selected_lora_name)
       lora_strength = 0.0
-      
-      # Setup Inicial
+
+      # Setup Inicial (Voltando ao original: Unload sempre que inicia)
       config.setPipe.unload_lora_weights()
       if lora_to_apply:
         lora_path = lora_to_apply["path"]
         lora_strength = lora_to_apply["cfg"]
         print(f"Aplicando LoRA '{selected_lora_name}'")
         config.setPipe.load_lora_weights(lora_path)
-          
+
       from src.modules.generate_click import generate_click
-      
+
       # Seed Input
       try:
         seed_input = int(seed_entry.get())
       except:
         seed_input = -1
 
-      # OTIMIZAÇÃO: Hash em cache
       model_path = getattr(config, "model_path", None)
-      model_hash = "Carregando..."
-      if model_path and os.path.exists(model_path):
-        if cached_model_hash["path"] == model_path and cached_model_hash["hash"]:
-          model_hash = cached_model_hash["hash"]
-        else:
-          model_hash = "HashOtimizado" 
-          cached_model_hash["path"] = model_path
-          cached_model_hash["hash"] = model_hash
 
       # Loop de geração
       for i in range(qtdImg):
-        if config.stop_img: 
+        if config.stop_img:
           print("Detectada parada antes da geração.")
           break
 
@@ -106,16 +89,16 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
         neg_prompt = negative_prompt_entry.get("1.0", "end-1c") or config.negative_prompt
         steps_val = int(steps.get())
         cfg_val = round(cfg.get(), 1)
-        
+
         # Seed incremental
         current_seed = seed_input
         if seed_input != -1 and i > 0:
           current_seed = seed_input + i
 
         start_time = time.time()
-        
+
         # Chama a geração
-        result = generate_click(generate_button, temperature_label, width, height, config.setTorch, config.setPipe, config.limit_temp, prompt_text, neg_prompt, steps_val, cfg_val, lora_strength, seed=current_seed, fila=qtdImg, positionFila=i)
+        result = generate_click(generate_button, temperature_label, width, height, torch, config.setPipe, config.limit_temp, prompt_text, neg_prompt, steps_val, cfg_val, lora_strength, seed=current_seed, fila=qtdImg, positionFila=i)
 
         if isinstance(result, int) and result == 1: 
           print("Ciclo interrompido.")
@@ -123,9 +106,9 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
           return
 
         image, used_seed = result
-        elapsed_time = time.time() - start_time
-        print(f"Imagem {i+1}/{qtdImg} pronta em {elapsed_time:.2f}s")
-        
+        elapsed_time = time.time() - start_time 
+        print(f"Imagem {i+1}/{qtdImg} | Seed: {used_seed} | Duração: {elapsed_time:.2f}s\n")
+
         metadata = {
           "Prompt": prompt_text,
           "Negative Prompt": neg_prompt,
@@ -133,15 +116,11 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
           "CFG Scale": cfg_val,
           "Seed": used_seed,
           "Size": f"{width}x{height}",
-          "Model hash": model_hash, 
           "Model": os.path.splitext(os.path.basename(model_path))[0] if model_path else "Unknown",
           "Lora": selected_lora_name or "None",
           "Generation Time": f"{elapsed_time:.2f}s"
         }
-        
         config.window.after(0, lambda img=image, meta=metadata: new_image_window(img, meta))
-
-      flush_memory()
 
     except Exception as e:
       config.error(f"Erro Fatal: {e}")

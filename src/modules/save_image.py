@@ -29,12 +29,10 @@ def save_image(image, metadata: dict = None):
       f"Software GitHub: {metadata.get('GitHub', '')}"
     )
 
-    print(metadata.get('Model', ''))
-
     png_info.add_text("parameters", compatible)
     png_info.add_text("Software", "CreativeMakeAI")
     image.save(file_path, pnginfo=png_info)
   else:
     image.save(file_path)
 
-  print(f"Imagem salva em: {file_path}")
+  print(f"Imagem salva: {file_path}")

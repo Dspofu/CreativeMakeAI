@@ -7,7 +7,7 @@ from src.modules.loading import progress
 def generate_click(generate_button: Button, temperature_label, width: int, height: int, torch, pipe: StableDiffusionXLPipeline, limit_temp: bool, prompt: str, negative_prompt: str, steps: int, cfg: float, lora_scale: float, seed: int, fila: int, positionFila: int):
   config.window.configure(cursor="watch")
   from src.modules.safe_temp import safe_temp
-  
+
   used_seed = None
 
   def listen_steps(pipe_instance, step_index, timestep, callback_kwargs) -> dict:
@@ -22,13 +22,11 @@ def generate_click(generate_button: Button, temperature_label, width: int, heigh
   try:
     if seed is None or seed == -1:
       seed = random.randint(0, 2**32 - 1)
-    
-    # Gerador
-    generator = torch.Generator(device="cpu").manual_seed(seed)
-    used_seed = seed 
 
-    config.window.title(f"{config.winTitle} | Gerando...")
-    
+    # Gerar Seed
+    generator = torch.Generator(device="cpu").manual_seed(seed) # device = "cuda" if torch.cuda.is_available() else "cpu"
+    used_seed = seed
+
     image = pipe(
       width=width,
       height=height,
@@ -40,14 +38,12 @@ def generate_click(generate_button: Button, temperature_label, width: int, heigh
       callback_on_step_end=listen_steps,
       generator=generator
     ).images[0]
-
     return image, used_seed
 
   except Exception as e:
     if config.stop_img:
       print("Geração interrompida pelo usuário.")
       return 1, -1
-    
     config.alert(f"Erro na geração:\n{e}")
     print(f"Erro crítico: {e}")
     return 1, -1
