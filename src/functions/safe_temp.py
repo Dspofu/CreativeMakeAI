@@ -1,5 +1,5 @@
 import pynvml
-from src.modules.popup import alert
+from src.functions.popup import alert
 import time
 
 critical_temp = False

@@ -10,8 +10,8 @@ import tkinter as tk
 import customtkinter as ctk
 import threading
 from PIL import Image, ImageTk
-from src.modules.flush_memory import*
-from src.modules.popup import*
+from src.functions.flush_memory import*
+from src.functions.popup import*
 
 # Verificação de OS
 if sys.platform != "win32":
@@ -20,6 +20,7 @@ if sys.platform != "win32":
 # Log para executável
 is_frozen = getattr(sys, 'frozen', False)
 if is_frozen:
+  print(f"Criando arquivo: {os.path.join(os.path.dirname(sys.executable), "log.txt")}")
   log_file = os.path.join(os.path.dirname(sys.executable), "log.txt")
   sys.stdout = open(log_file, "w", encoding="utf-8")
   sys.stderr = sys.stdout
@@ -30,11 +31,13 @@ github = "https://github.com/Dspofu/CreativeMakeAI"
 # Variáveis Globais
 model_path = None
 setPipe = None
+setCompel = None
 profile = "Balanced" 
-limit_temp = True
+limit_temp = False
 stop_img = False
+benchmark_sequence = False
 loaded_loras = {}
-negative_prompt = "blurry, low quality, low resolution, out of focus, overexposed, underexposed, grainy, distorted, watermark, text, signature, frame, oversaturated, unrealistic proportions, deformed anatomy, incorrect limb positioning, broken hands, extra fingers, overlapping limbs, blurred eyes, unrealistic facial features, extra limbs, missing body parts, messy background, crowded composition, noise, compression artifacts, cartoonish, overly stylized, unnatural poses, distorted perspectives, unnatural lighting, disproportionate body parts, body parts passing through clothing, clothing blending into skin, unnatural folds in clothing, floating accessories, misaligned clothing, warped fabric, inconsistent textures in clothing, skeleton visible through clothing, unintentionally see-through clothing, excessive wrinkles, unrealistic body-cloth interactions"
+negative_prompt = "blurry, low quality, out of focus, grainy, overexposed, underexposed, distorted, watermark, text deformed anatomy, incorrect limbs, broken hands, extra fingers, missing fingers, extra limbs, missing limbs, unnatural poses, warped proportions unrealistic facial features, blurred eyes, mutated face clothing clipping, skin-cloth blending, warped fabric, inconsistent textures messy background, crowded composition, noise, compression artifacts, unnatural lighting, distorted perspective"
 
 # Cores
 COR_FRAME = "#1e1e2f"

@@ -2,9 +2,9 @@ import os
 import torch
 import config
 import time
-from src.modules.flush_memory import*
-from src.modules.loading import progress
-from src.modules.save_image import save_image
+from src.functions.flush_memory import*
+from src.functions.loading import progress
+from src.functions.save_image import save_image
 
 # Cache de Hash
 cached_model_hash = {"path": None, "hash": None}
@@ -39,6 +39,10 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
 
   def worker():
     try:
+      if config.benchmark_sequence:
+        print("Aplicando calculo performático para multiplas imagens.")
+        torch.backends.cudnn.benchmark = True
+
       if config.setPipe is None:
         config.error("Erro: pipe não foi definido.")
         return 1
@@ -48,12 +52,8 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
         return 1
 
       # Definição de Resolução
-      width, height = 1024, 1024
-      if scale_image == "512x512": width, height = 512, 512
-      elif scale_image == "1920x1080": width, height = 1920, 1080
-      elif scale_image == "2048x2048": width, height = 2048, 2048
-
-      progress(0)
+      scale = scale_image.split("x")
+      width, height = int(scale[0]), int(scale[1])
       generate_button.configure(state="disabled", text="Configurando ambiente")
 
       # LoRA
@@ -101,8 +101,7 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
         result = generate_click(generate_button, temperature_label, width, height, torch, config.setPipe, config.limit_temp, prompt_text, neg_prompt, steps_val, cfg_val, lora_strength, seed=current_seed, fila=qtdImg, positionFila=i)
 
         if isinstance(result, int) and result == 1: 
-          print("Ciclo interrompido.")
-          flush_memory()
+          print("Processo interrompido.")
           return
 
         image, used_seed = result
@@ -125,11 +124,12 @@ def viwerImage(generate_button, temperature_label, scale_image: str, prompt_entr
     except Exception as e:
       config.error(f"Erro Fatal: {e}")
       print(f"Erro no worker: {e}")
-      flush_memory()
     finally:
+      flush_memory()
       config.window.title(config.winTitle)
       config.window.configure(cursor="")
       generate_button.configure(state="normal", text="Gerar Imagem")
       temperature_label.configure(text="--°C", text_color="#D9D9D9")
+      progress(100)
 
   config.threading.Thread(target=worker, daemon=True).start()

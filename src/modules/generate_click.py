@@ -2,11 +2,11 @@ import random
 from tkinter import Button
 from diffusers import StableDiffusionXLPipeline
 import config
-from src.modules.loading import progress
+from src.functions.loading import progress
 
 def generate_click(generate_button: Button, temperature_label, width: int, height: int, torch, pipe: StableDiffusionXLPipeline, limit_temp: bool, prompt: str, negative_prompt: str, steps: int, cfg: float, lora_scale: float, seed: int, fila: int, positionFila: int):
   config.window.configure(cursor="watch")
-  from src.modules.safe_temp import safe_temp
+  from src.functions.safe_temp import safe_temp
 
   used_seed = None
 
@@ -27,11 +27,18 @@ def generate_click(generate_button: Button, temperature_label, width: int, heigh
     generator = torch.Generator(device="cpu").manual_seed(seed) # device = "cuda" if torch.cuda.is_available() else "cpu"
     used_seed = seed
 
+    compel_prompt, pooled_prompt = config.setCompel(prompt)
+    compel_negative_prompt, pooled_negative_prompt = config.setCompel(negative_prompt)
+
     image = pipe(
       width=width,
       height=height,
-      prompt=prompt,
-      negative_prompt=negative_prompt,
+      # prompt=prompt,
+      # negative_prompt=negative_prompt,
+      prompt_embeds=compel_prompt,
+      pooled_prompt_embeds=pooled_prompt,
+      negative_prompt_embeds=compel_negative_prompt,
+      negative_pooled_prompt_embeds=pooled_negative_prompt,
       num_inference_steps=steps,
       guidance_scale=cfg,
       cross_attention_kwargs={"scale": lora_scale},
@@ -49,5 +56,4 @@ def generate_click(generate_button: Button, temperature_label, width: int, heigh
     return 1, -1
 
   finally:
-    if temperature_label:
-      temperature_label.configure(text="--°C", text_color="#D9D9D9")
+    progress(100)
