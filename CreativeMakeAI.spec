@@ -1,14 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('assets', 'assets'), ('src', 'src')]
+datas = [('./assets', 'assets')]
 binaries = []
-hiddenimports = ['PIL', 'pynvml', 'accelerate']
-tmp_ret = collect_all('customtkinter')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+hiddenimports = []
 tmp_ret = collect_all('transformers')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-tmp_ret = collect_all('diffusers')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 
@@ -43,7 +39,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['assets\\images\\icon_24px.ico'],
+    icon=['assets\\images\\creative_icon.ico'],
 )
 coll = COLLECT(
     exe,

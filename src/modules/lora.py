@@ -23,7 +23,7 @@ def select_lora(lora_listbox, model_lora, lora_label, lora_scale):
   finally:
     model_lora.configure(state="disabled", text=f"LoRA carregado com sucesso")
     time.sleep(1.5)
-    model_lora.configure(state="normal", text="Adicionar LoRA")
+    model_lora.configure(text="+", state="normal")
 
 # Função para deletar o LoRA
 def unload_lora(lora_listbox, lora_label, lora_scale):
