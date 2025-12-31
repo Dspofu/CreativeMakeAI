@@ -1,43 +1,45 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+import threading
+import time
+import customtkinter as ctk
 
-model_name = "Qwen/Qwen3-30B-A3B-Thinking-2507"
+def carregar_app(status):
+    splash.after(0, lambda: status.configure(text="Carregando dados..."))
+    time.sleep(3)
 
-# load the tokenizer and the model
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(
-    model_name,
-    torch_dtype="auto",
-    device_map="auto"
-)
+    splash.after(0, lambda: status.configure(text="Pronto!"))
+    time.sleep(1)
 
-# prepare the model input
-prompt = "Give me a short introduction to large language model."
-messages = [
-    {"role": "user", "content": prompt}
-]
-text = tokenizer.apply_chat_template(
-    messages,
-    tokenize=False,
-    add_generation_prompt=True,
-)
-model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+    splash.after(0, abrir_janela_principal)
+    splash.after(0, splash.destroy)
 
-# conduct text completion
-generated_ids = model.generate(
-    **model_inputs,
-    max_new_tokens=32768
-)
-output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
+def abrir_janela_principal():
+    app = ctk.CTkToplevel(splash)
+    app.title("App Principal")
+    app.geometry("800x600")
+    app.mainloop()
 
-# parsing thinking content
-try:
-    # rindex finding 151668 (</think>)
-    index = len(output_ids) - output_ids[::-1].index(151668)
-except ValueError:
-    index = 0
+splash = ctk.CTk()
+splash.title("Loading...")
+splash.geometry("300x150")
+splash.overrideredirect(True)
 
-thinking_content = tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
-content = tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
+frame = ctk.CTkFrame(splash)
+frame.pack(fill="both", expand=True)
 
-print("thinking content:", thinking_content)  # no opening <think> tag
-print("content:", content)
+lbl_title = ctk.CTkLabel(frame, text="teste")
+lbl_title.pack(pady=(30, 10))
+
+lbl_status = ctk.CTkLabel(frame, text="Iniciando")
+lbl_status.pack(pady=5)
+
+progress = ctk.CTkProgressBar(frame, mode="indeterminate")
+progress.pack(pady=10)
+progress.start()
+
+threading.Thread(
+    target=carregar_app,
+    args=(lbl_status,),
+    daemon=True
+).start()
+
+splash.mainloop()

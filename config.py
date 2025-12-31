@@ -70,21 +70,12 @@ class Colors:
   COR_BOTAO_IMAGE_CANCEL = "#DB0909"
   COR_BOTAO_IMAGE_HOVER = "#008800"
 
+
+window: ctk.CTk = None
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-window = ctk.CTk()
-
-try:
-  try:
-    icon = f"{os.path.dirname(sys.executable)}\\assets\\images\\creative_icon.ico"
-    window.iconbitmap(icon)
-  except Exception:
-    icon = f"{os.path.dirname(sys.executable)}\\..\\..\\assets\\images\\creative_icon.ico"
-    window.iconbitmap(icon)
-    pass
-  png_icon = tk.PhotoImage(file=f"{os.path.dirname(sys.executable)}\\assets\\images\\icon.png")
-  window.iconphoto(True, png_icon)
-except Exception:
-  png_icon = tk.PhotoImage(file=f"{os.path.dirname(sys.executable)}\\..\\..\\assets\\images\\icon.png")
-  window.iconphoto(True, png_icon)
+# icon = f"{os.path.dirname(sys.executable).replace(r"venv\Scripts", "assets")}\\images\\creative_icon.ico"
+# window.iconbitmap(icon)
+# png_icon = tk.PhotoImage(file=f"{os.path.dirname(sys.executable).replace(r"venv\Scripts", "assets")}\\images\\icon.png")
+# window.iconphoto(True, png_icon)
